@@ -2,11 +2,13 @@
   "version": 2,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
+    { "src": "bin.png", "use": "@vercel/static" },
     { "src": "api/*.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/notify", "dest": "/api/notify.js" },
     { "src": "/api/square", "dest": "/api/square.js" },
+    { "src": "/bin.png", "dest": "/bin.png" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
