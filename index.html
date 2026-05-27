@@ -374,7 +374,7 @@ footer strong{color:var(--gold);}
         <div class="form-group full"><label>Street Address</label><input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep3()"></div>
         <div class="form-group"><label>City</label><input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep3()"></div>
         <div class="form-group"><label>ZIP Code</label><input type="text" id="fZip" placeholder="76101" oninput="checkStep3()"></div>
-        <div class="form-group full"><label>Preferred Service Date</label><input type="date" id="fDate" oninput="checkStep3()"></div>
+        <div class="form-group full"><label>Preferred Service Date (optional)</label><input type="date" id="fDate" oninput="checkStep3()"></div>
         <div class="form-group full"><label>Notes (optional)</label><textarea id="fNotes" placeholder="Gate code, pickup day, number of bins, anything else..."></textarea></div>
       </div>
       <div class="book-nav"><button class="btn-back" onclick="goStep(2)">← Back</button><button class="btn-next" id="btn3" onclick="goStep(4)" disabled>Review Order →</button></div>
@@ -483,7 +483,7 @@ function selectFreq(f) {
 }
 
 function checkStep3() {
-  var fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate'];
+  var fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip'];
   var ok = fields.every(function(id){ return document.getElementById(id).value.trim() !== ''; });
   document.getElementById('btn3').disabled = !ok;
 }
