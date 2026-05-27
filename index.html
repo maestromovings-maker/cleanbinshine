@@ -7,790 +7,224 @@
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 <style>
-  :root {
-    --navy: #0d2248;
-    --navy-dark: #091830;
-    --navy-mid: #162f5c;
-    --gold: #e8a81e;
-    --gold-light: #f5c842;
-    --green: #4caf50;
-    --green-bright: #6dd96d;
-    --white: #f5f0e8;
-    --gray: #8fa0b8;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--navy-dark);
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ── TOP BAR ── */
-  .topbar {
-    background: var(--navy-dark);
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    padding: 10px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(8px);
-  }
-  .topbar-logo {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 3px;
-    color: var(--white);
-    text-transform: uppercase;
-  }
-  .topbar-logo span { color: var(--gold); }
-  .topbar-contact {
-    font-size: 0.9rem;
-    color: var(--gray);
-    text-align: right;
-    line-height: 1.4;
-  }
-  .topbar-contact a { color: var(--gold); text-decoration: none; font-weight: 700; }
-
-  /* ── TABS ── */
-  .tab-nav {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    padding: 16px 16px 0;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 10;
-  }
-  .tab-btn {
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 18px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-bottom: none;
-    color: var(--gray);
-    cursor: pointer;
-    border-radius: 6px 6px 0 0;
-    transition: all 0.2s;
-  }
-  .tab-btn:hover { color: var(--white); border-color: rgba(232,168,30,0.4); }
-  .tab-btn.active { background: var(--navy-mid); color: var(--gold); border-color: rgba(232,168,30,0.5); }
-  .tab-line { height: 2px; background: rgba(232,168,30,0.3); margin: 0 16px; position: relative; z-index: 10; }
-
-  /* ── TAB PANELS ── */
-  .tab-panel { display: none; animation: fadeUp 0.35s ease; }
-  .tab-panel.active { display: block; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes float {
-    0%,100% { transform: translateY(0px); }
-    50%      { transform: translateY(-14px); }
-  }
-  @keyframes sparkPulse {
-    0%,100% { opacity: 0.4; transform: scale(0.85); }
-    50%      { opacity: 1;   transform: scale(1.15); }
-  }
-  @keyframes spinSlow { to { transform: rotate(360deg); } }
-  @keyframes floatIn {
-    from { opacity: 0; transform: scale(0.85) translateY(20px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  /* ══ HERO ══ */
-  .hero {
-    background: var(--navy-mid);
-    min-height: 88vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 56px 24px 48px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    width: 700px; height: 700px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(232,168,30,0.07) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  }
-
-  /* ARCH title */
-  .hero-arch {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(2rem, 6vw, 4rem);
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    color: var(--white);
-    line-height: 1;
-    margin-bottom: 0;
-    animation: fadeUp 0.7s 0.1s ease both;
-  }
-
-  /* bin visual */
-  .hero-visual {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    margin: 8px 0;
-    animation: floatIn 0.9s 0.2s ease both;
-  }
-  .bin-wrap {
-    position: relative;
-    width: clamp(200px, 36vw, 340px);
-  }
-  .bin-wrap img {
-    width: 100%;
-    filter: drop-shadow(0 24px 48px rgba(0,0,0,0.5));
-    animation: float 4s ease-in-out infinite;
-  }
-  .sparkle { position: absolute; width: 52px; height: 52px; pointer-events: none; }
-  .sparkle svg { width: 100%; height: 100%; }
-  .sp1 { top: 0%; left: -6%; animation: sparkPulse 2.5s ease-in-out infinite; }
-  .sp2 { top: 35%; right: -8%; animation: sparkPulse 2.5s 0.8s ease-in-out infinite; }
-  .sp3 { bottom: 5%; left: 5%; animation: sparkPulse 2.5s 1.4s ease-in-out infinite; }
-  .ring {
-    position: absolute;
-    inset: -20px;
-    border: 1px solid rgba(232,168,30,0.12);
-    border-radius: 50%;
-    animation: spinSlow 22s linear infinite;
-  }
-  .ring2 { inset: -48px; border-color: rgba(232,168,30,0.05); animation-duration: 38s; animation-direction: reverse; }
-
-  /* tagline below bin */
-  .hero-tagline {
-    font-family: 'Arimo', sans-serif;
-    font-size: clamp(0.75rem, 2vw, 0.95rem);
-    font-weight: 700;
-    color: var(--green-bright);
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    margin: 4px 0 28px;
-    animation: fadeUp 0.7s 0.4s ease both;
-  }
-
-  .hero-desc {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--gray);
-    max-width: 480px;
-    margin: 0 auto 32px;
-    animation: fadeUp 0.7s 0.5s ease both;
-  }
-  .hero-cta-row {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.7s 0.6s ease both;
-  }
-  .hero-badges {
-    display: flex;
-    gap: 20px;
-    margin-top: 32px;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.7s 0.75s ease both;
-  }
-  .badge {
-    font-size: 0.78rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gray);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-
-  /* ── BUTTONS ── */
-  .btn-primary {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 15px 32px;
-    background: var(--gold);
-    color: var(--navy-dark);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,168,30,0.35); }
-  .btn-secondary {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 14px 32px;
-    background: transparent;
-    color: var(--white);
-    border: 1.5px solid rgba(255,255,255,0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* ── SHARED SECTION ── */
-  .section { max-width: 920px; margin: 0 auto; padding: 64px 24px; }
-  .section-label {
-    font-size: 0.78rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 10px;
-  }
-  .section-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    letter-spacing: 2px;
-    color: var(--white);
-    line-height: 1;
-    margin-bottom: 14px;
-  }
-  .section-title span { color: var(--gold); }
-  .section-sub { font-size: 1rem; color: var(--gray); max-width: 520px; line-height: 1.75; margin-bottom: 48px; }
-
-  /* ══ WHY IT MATTERS ══ */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-    gap: 2px;
-    background: rgba(232,168,30,0.12);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 48px;
-  }
-  .stat-block { background: var(--navy-mid); padding: 32px 18px; text-align: center; }
-  .stat-num { font-family: 'Black Han Sans', sans-serif; font-size: 2.8rem; color: var(--gold); line-height: 1; }
-  .stat-unit { font-size: 1.4rem; color: var(--gold-light); }
-  .stat-label { font-size: .73rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-top: 6px; line-height: 1.4; }
-  .reason-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
-  .reason-card { background: var(--navy-mid); border: 1px solid rgba(255,255,255,.07); border-radius: 10px; padding: 28px 24px; transition: border-color .2s, transform .2s; position: relative; overflow: hidden; }
-  .reason-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
-  .reason-card:hover::before { transform: scaleX(1); }
-  .reason-card:hover { border-color: rgba(232,168,30,.3); transform: translateY(-4px); }
-  .reason-icon { font-size: 2.2rem; margin-bottom: 14px; display: block; }
-  .reason-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.05rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--white); margin-bottom: 10px; }
-  .reason-card p { font-size: .87rem; color: var(--gray); line-height: 1.7; }
-  .stat-callout { display: inline-block; margin-top: 12px; background: rgba(232,168,30,.12); border: 1px solid rgba(232,168,30,.25); border-radius: 4px; padding: 5px 12px; font-size: .72rem; font-weight: 700; letter-spacing: 1px; color: var(--gold-light); text-transform: uppercase; }
-  .heat-banner { margin-top: 40px; background: linear-gradient(135deg, rgba(232,100,30,.12) 0%, rgba(22,47,92,.9) 100%); border: 1px solid rgba(232,120,30,.3); border-radius: 10px; padding: 36px 40px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
-  .heat-icon { font-size: 3.5rem; flex-shrink: 0; }
-  .heat-banner h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; letter-spacing: 2px; text-transform: uppercase; color: var(--white); margin-bottom: 8px; }
-  .heat-banner p { font-size: .9rem; color: var(--gray); line-height: 1.7; max-width: 540px; }
-  .heat-banner p strong { color: var(--gold-light); }
-
-  /* ══ HOW IT WORKS ══ */
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2px; background: rgba(232,168,30,0.1); border-radius: 8px; overflow: hidden; }
-  .step { background: var(--navy-mid); padding: 36px 28px; position: relative; transition: background 0.2s; }
-  .step:hover { background: #1d3a6e; }
-  .step-num { font-family: 'Black Han Sans', sans-serif; font-size: 4rem; color: rgba(232,168,30,0.15); line-height: 1; position: absolute; top: 16px; right: 20px; }
-  .step-icon { font-size: 2rem; margin-bottom: 16px; }
-  .step h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.1rem; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
-  .step p { font-size: 0.88rem; line-height: 1.6; color: var(--gray); }
-
-  /* ══ PRICING ══ */
-  .pricing-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 48px;
-    background: var(--navy-mid);
-    border-radius: 6px;
-    padding: 4px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .toggle-btn {
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 28px;
-    background: transparent;
-    border: none;
-    color: var(--gray);
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s;
-  }
-  .toggle-btn.active { background: var(--gold); color: var(--navy-dark); }
-  .pricing-panel { display: none; }
-  .pricing-panel.active { display: block; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-  .price-card { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 36px 28px; position: relative; transition: transform 0.2s, border-color 0.2s; }
-  .price-card:hover { transform: translateY(-4px); border-color: rgba(232,168,30,0.3); }
-  .price-card.featured { border-color: var(--gold); background: linear-gradient(160deg, #1d3a6e 0%, var(--navy-mid) 100%); }
-  .featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
-  .price-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.5rem; letter-spacing: 2px; color: var(--white); margin-bottom: 6px; }
-  .price-desc { font-size: 0.85rem; color: var(--gray); margin-bottom: 24px; line-height: 1.5; }
-  .price-amount { font-family: 'Black Han Sans', sans-serif; font-size: 3.2rem; color: var(--gold); line-height: 1; }
-  .price-amount sup { font-size: 1.4rem; vertical-align: top; margin-top: 8px; display: inline-block; }
-  .price-per { font-size: 0.8rem; color: var(--gray); margin-bottom: 28px; }
-  .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
-  .price-features li { font-size: 0.88rem; color: var(--gray); display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
-  .price-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; flex-shrink: 0; }
-  .btn-price { width: 100%; font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.92rem; letter-spacing: 2px; text-transform: uppercase; padding: 14px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border: none; }
-  .btn-price-gold { background: var(--gold); color: var(--navy-dark); }
-  .btn-price-gold:hover { background: var(--gold-light); }
-  .btn-price-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: var(--white); }
-  .btn-price-outline:hover { border-color: var(--gold); color: var(--gold); }
-  .pricing-note { text-align: center; margin-top: 32px; font-size: 0.85rem; color: var(--gray); }
-  .pricing-note strong { color: var(--green-bright); }
-
-  /* stink banner */
-  .stink-banner {
-    background: linear-gradient(135deg, rgba(232,168,30,0.12) 0%, rgba(22,47,92,0.9) 100%);
-    border-top: 1px solid rgba(232,168,30,0.2);
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    padding: 28px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    text-align: center;
-  }
-  .stink-banner p { font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--white); }
-  .stink-banner p em { color: var(--gold); font-style: normal; }
-
-  /* ══ SERVICE AREA ══ */
-  .area-hero { background: var(--navy-mid); border-radius: 10px; padding: 48px 36px; text-align: center; margin-bottom: 32px; border: 1px solid rgba(232,168,30,0.12); position: relative; overflow: hidden; }
-  .area-hero::before { content: '📍'; font-size: 8rem; position: absolute; bottom: -20px; right: -10px; opacity: 0.06; }
-  .area-hero h2 { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 3px; color: var(--white); margin-bottom: 12px; }
-  .area-hero p { color: var(--gray); font-size: 1rem; line-height: 1.6; max-width: 480px; margin: 0 auto 28px; }
-  .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .city-pill { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 600; color: var(--white); transition: border-color 0.2s; }
-  .city-pill:hover { border-color: var(--gold); }
-  .city-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-  .area-cta { background: linear-gradient(135deg, rgba(232,168,30,0.1) 0%, rgba(22,47,92,0.8) 100%); border: 1px solid rgba(232,168,30,0.25); border-radius: 10px; padding: 40px; text-align: center; margin-top: 32px; }
-  .area-cta h3 { font-family: 'Black Han Sans', sans-serif; font-size: 2rem; letter-spacing: 2px; margin-bottom: 10px; color: var(--white); }
-  .area-cta p { color: var(--gray); margin-bottom: 24px; font-size: 0.95rem; }
-
-  /* ══ BOOKING FLOW ══ */
-  .book-wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
-  .book-header { text-align: center; margin-bottom: 48px; }
-  .book-header h2 { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 3px; color: var(--white); margin-bottom: 10px; }
-  .book-header h2 span { color: var(--gold); }
-  .book-header p { color: var(--gray); font-size: 0.95rem; }
-
-  /* progress bar */
-  .progress-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 48px; }
-  .prog-step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .prog-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--navy-mid); border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-family: 'Black Han Sans', sans-serif; font-size: 0.9rem; color: var(--gray); transition: all 0.3s; }
-  .prog-dot.active { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
-  .prog-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
-  .prog-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
-  .prog-label.active { color: var(--gold); }
-  .prog-line { width: 60px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 22px; transition: background 0.3s; }
-  .prog-line.done { background: var(--green); }
-
-  /* booking step panels */
-  .book-step { display: none; animation: fadeUp 0.3s ease; }
-  .book-step.active { display: block; }
-
-  /* plan cards */
-  .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
-  @media (max-width: 520px) { .plan-grid { grid-template-columns: 1fr; } }
-  .plan-card {
-    background: var(--navy-mid);
-    border: 2px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 32px 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-  }
-  .plan-card:hover { border-color: rgba(232,168,30,0.4); transform: translateY(-3px); }
-  .plan-card.selected { border-color: var(--gold); background: linear-gradient(160deg, #1d3a6e 0%, var(--navy-mid) 100%); }
-  .plan-card .plan-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; padding: 3px 14px; border-radius: 20px; white-space: nowrap; }
-  .plan-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--white); margin-bottom: 4px; }
-  .plan-price { font-family: 'Black Han Sans', sans-serif; font-size: 2.6rem; color: var(--gold); line-height: 1; margin: 12px 0 4px; }
-  .plan-price span { font-size: 1rem; color: var(--gray); }
-  .plan-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.55; margin-bottom: 16px; }
-  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .plan-features li { font-size: 0.85rem; color: var(--gray); display: flex; gap: 8px; align-items: flex-start; }
-  .plan-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; flex-shrink: 0; }
-
-  /* frequency */
-  .freq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
-  @media (max-width: 480px) { .freq-grid { grid-template-columns: 1fr; } }
-  .freq-card { background: var(--navy-mid); border: 2px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 28px 24px; cursor: pointer; transition: all 0.2s; text-align: center; }
-  .freq-card:hover { border-color: rgba(232,168,30,0.4); }
-  .freq-card.selected { border-color: var(--gold); }
-  .freq-icon { font-size: 2.4rem; margin-bottom: 10px; }
-  .freq-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.2rem; letter-spacing: 2px; color: var(--white); margin-bottom: 6px; }
-  .freq-card p { font-size: 0.85rem; color: var(--gray); line-height: 1.5; }
-  .freq-savings { display: inline-block; margin-top: 10px; background: rgba(109,217,109,0.12); border: 1px solid rgba(109,217,109,0.3); border-radius: 4px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; color: var(--green-bright); text-transform: uppercase; }
-
-  /* address form */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
-  .form-group { margin-bottom: 18px; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-group label { display: block; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-bottom: 6px; }
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    padding: 12px 14px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-    outline: none;
-  }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
-  .form-group select option { background: var(--navy-dark); }
-  .form-group textarea { resize: vertical; min-height: 80px; }
-
-  /* confirm */
-  .confirm-card { background: var(--navy-mid); border: 1px solid rgba(232,168,30,0.2); border-radius: 12px; padding: 36px; margin-bottom: 24px; }
-  .confirm-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .confirm-row:last-child { border-bottom: none; }
-  .confirm-label { font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
-  .confirm-value { font-weight: 700; color: var(--white); text-align: right; max-width: 60%; }
-  .confirm-total { font-family: 'Black Han Sans', sans-serif; font-size: 1.8rem; color: var(--gold); }
-
-  /* nav buttons */
-  .book-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; gap: 16px; }
-  .btn-back { font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: var(--gray); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-  .btn-back:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-next { font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase; padding: 15px 36px; background: var(--gold); color: var(--navy-dark); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; flex: 1; max-width: 280px; }
-  .btn-next:hover { background: var(--gold-light); transform: translateY(-2px); }
-  .btn-next:disabled { background: rgba(232,168,30,0.3); cursor: not-allowed; transform: none; }
-
-  /* success */
-  .book-success { display: none; text-align: center; padding: 48px 24px; }
-  .book-success .success-icon { font-size: 4rem; margin-bottom: 16px; }
-  .book-success h3 { font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem; letter-spacing: 3px; color: var(--green-bright); margin-bottom: 10px; }
-  .book-success p { color: var(--gray); font-size: 0.95rem; line-height: 1.7; max-width: 420px; margin: 0 auto 24px; }
-
-  /* one-time note */
-  .onetime-note { background: rgba(232,168,30,0.08); border: 1px solid rgba(232,168,30,0.2); border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; font-size: 0.88rem; color: var(--gray); line-height: 1.6; }
-  .onetime-note strong { color: var(--gold-light); }
-
-  /* ── FOOTER ── */
-  footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 28px 24px; text-align: center; color: var(--gray); font-size: 0.8rem; letter-spacing: 0.5px; }
-  footer strong { color: var(--gold); }
-
-  @media (max-width: 600px) {
-    .tab-btn { padding: 8px 12px; font-size: 0.72rem; }
-    .plan-grid { grid-template-columns: 1fr; }
-  }
-
-  /* ══ ADMIN ══ */
-  #adminOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 999;
-    align-items: center;
-    justify-content: center;
-  }
-  #adminOverlay.show { display: flex; }
-
-  .admin-login {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.3);
-    border-radius: 12px;
-    padding: 48px 40px;
-    width: min(400px, 90vw);
-    text-align: center;
-  }
-  .admin-login h2 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .admin-login p { font-size: 0.85rem; color: var(--gray); margin-bottom: 28px; }
-  .admin-login input {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 4px;
-    padding: 13px 16px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 1rem;
-    outline: none;
-    margin-bottom: 14px;
-    transition: border-color 0.2s;
-  }
-  .admin-login input:focus { border-color: var(--gold); }
-  .admin-login .err { font-size: 0.82rem; color: #ff6b6b; margin-bottom: 12px; display: none; }
-  .admin-close-btn {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none;
-    border: none;
-    color: var(--gray);
-    font-size: 1.4rem;
-    cursor: pointer;
-    font-family: 'Arimo', sans-serif;
-  }
-
-  /* admin dashboard */
-  #adminPanel {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: var(--navy-dark);
-    z-index: 1000;
-    overflow-y: auto;
-    padding: 32px 24px;
-  }
-  #adminPanel.show { display: block; }
-
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .admin-header h1 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: var(--gold);
-  }
-  .admin-header p { font-size: 0.8rem; color: var(--gray); letter-spacing: 1px; }
-
-  .admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 36px;
-  }
-  .admin-stat {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.12);
-    border-radius: 8px;
-    padding: 24px 20px;
-    text-align: center;
-  }
-  .admin-stat .num {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 2.4rem;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .admin-stat .lbl { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-top: 6px; }
-
-  .admin-section-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    color: var(--white);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-  }
-
-  /* pricing editor */
-  .pricing-editor {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.15);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 36px;
-  }
-  .price-edit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  @media (max-width: 500px) { .price-edit-grid { grid-template-columns: 1fr; } }
-  .price-edit-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: 20px;
-  }
-  .price-edit-card h4 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 1.5px;
-    color: var(--white);
-    margin-bottom: 14px;
-  }
-  .price-edit-card label {
-    display: block;
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 5px;
-    margin-top: 12px;
-  }
-  .price-edit-card input {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    padding: 10px 12px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .price-edit-card input:focus { border-color: var(--gold); }
-  .btn-save-pricing {
-    margin-top: 20px;
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 13px 32px;
-    background: var(--gold);
-    color: var(--navy-dark);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-save-pricing:hover { background: var(--gold-light); }
-  .save-confirm { display: none; color: var(--green-bright); font-size: 0.85rem; margin-top: 10px; }
-
-  /* entries table */
-  .entries-wrap {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.15);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 36px;
-    overflow-x: auto;
-  }
-  .entries-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-  .entries-table th {
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray);
-    padding: 10px 14px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    white-space: nowrap;
-  }
-  .entries-table td {
-    padding: 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: var(--white);
-    vertical-align: top;
-  }
-  .entries-table tr:last-child td { border-bottom: none; }
-  .entries-table tr:hover td { background: rgba(255,255,255,0.03); }
-  .entry-plan {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .plan-sub { background: rgba(232,168,30,0.15); color: var(--gold); }
-  .plan-one { background: rgba(109,217,109,0.12); color: var(--green-bright); }
-  .no-entries { text-align: center; color: var(--gray); padding: 32px; font-size: 0.9rem; }
-
-  .btn-admin-logout {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    background: transparent;
-    border: 1.5px solid rgba(255,255,255,0.2);
-    color: var(--gray);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-admin-logout:hover { border-color: #ff6b6b; color: #ff6b6b; }
-  .btn-export {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    background: var(--navy-mid);
-    border: 1.5px solid rgba(232,168,30,0.3);
-    color: var(--gold);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-export:hover { border-color: var(--gold); background: rgba(232,168,30,0.08); }
-
+:root{--navy:#0d2248;--navy-dark:#091830;--navy-mid:#162f5c;--gold:#e8a81e;--gold-light:#f5c842;--green:#4caf50;--green-bright:#6dd96d;--white:#f5f0e8;--gray:#8fa0b8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--navy-dark);color:var(--white);font-family:'Arimo',sans-serif;min-height:100vh;overflow-x:hidden;}
+.topbar{background:var(--navy-dark);border-bottom:1px solid rgba(232,168,30,0.2);padding:10px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);}
+.topbar-logo{font-family:'Black Han Sans',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--white);text-transform:uppercase;cursor:pointer;user-select:none;}
+.topbar-logo span{color:var(--gold);}
+.topbar-contact{font-size:0.9rem;color:var(--gray);text-align:right;line-height:1.4;}
+.topbar-contact a{color:var(--gold);text-decoration:none;font-weight:700;}
+.tab-nav{display:flex;justify-content:center;gap:4px;padding:16px 16px 0;flex-wrap:wrap;z-index:10;position:relative;}
+.tab-btn{font-family:'Arimo',sans-serif;font-size:0.82rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-bottom:none;color:var(--gray);cursor:pointer;border-radius:6px 6px 0 0;transition:all 0.2s;}
+.tab-btn:hover{color:var(--white);border-color:rgba(232,168,30,0.4);}
+.tab-btn.active{background:var(--navy-mid);color:var(--gold);border-color:rgba(232,168,30,0.5);}
+.tab-line{height:2px;background:rgba(232,168,30,0.3);margin:0 16px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fadeUp 0.35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes sparkPulse{0%,100%{opacity:0.4;transform:scale(0.85)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+@keyframes floatIn{from{opacity:0;transform:scale(0.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.hero{background:var(--navy-mid);min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:56px 24px 48px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(232,168,30,0.07) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.hero-arch{font-family:'Black Han Sans',sans-serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:5px;text-transform:uppercase;color:var(--white);line-height:1;animation:fadeUp 0.7s 0.1s ease both;position:relative;z-index:1;}
+.hero-visual{display:flex;justify-content:center;align-items:center;position:relative;margin:8px 0;animation:floatIn 0.9s 0.2s ease both;z-index:1;}
+.bin-wrap{position:relative;width:clamp(200px,36vw,340px);}
+.bin-wrap img{width:100%;filter:drop-shadow(0 24px 48px rgba(0,0,0,0.5));animation:float 4s ease-in-out infinite;}
+.sparkle{position:absolute;width:52px;height:52px;pointer-events:none;}
+.sparkle svg{width:100%;height:100%;}
+.sp1{top:0%;left:-6%;animation:sparkPulse 2.5s ease-in-out infinite;}
+.sp2{top:35%;right:-8%;animation:sparkPulse 2.5s 0.8s ease-in-out infinite;}
+.sp3{bottom:5%;left:5%;animation:sparkPulse 2.5s 1.4s ease-in-out infinite;}
+.ring{position:absolute;inset:-20px;border:1px solid rgba(232,168,30,0.12);border-radius:50%;animation:spinSlow 22s linear infinite;}
+.ring2{inset:-48px;border-color:rgba(232,168,30,0.05);animation-duration:38s;animation-direction:reverse;}
+.hero-tagline{font-family:'Arimo',sans-serif;font-size:clamp(0.75rem,2vw,0.95rem);font-weight:700;color:var(--green-bright);letter-spacing:2.5px;text-transform:uppercase;margin:4px 0 28px;animation:fadeUp 0.7s 0.4s ease both;position:relative;z-index:1;}
+.hero-desc{font-size:1rem;line-height:1.8;color:var(--gray);max-width:480px;margin:0 auto 32px;animation:fadeUp 0.7s 0.5s ease both;position:relative;z-index:1;}
+.hero-cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.7s 0.6s ease both;position:relative;z-index:1;}
+.hero-badges{display:flex;gap:20px;margin-top:32px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.7s 0.75s ease both;position:relative;z-index:1;}
+.badge{font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);display:flex;align-items:center;gap:6px;}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.btn-primary{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:2px;text-transform:uppercase;padding:15px 32px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:4px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-2px);}
+.btn-secondary{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,0.3);border-radius:4px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+.section{max-width:920px;margin:0 auto;padding:64px 24px;}
+.section-label{font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;color:var(--green-bright);margin-bottom:10px;}
+.section-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(2rem,5vw,3.5rem);letter-spacing:2px;color:var(--white);line-height:1;margin-bottom:14px;}
+.section-title span{color:var(--gold);}
+.section-sub{font-size:1rem;color:var(--gray);max-width:520px;line-height:1.75;margin-bottom:48px;}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:2px;background:rgba(232,168,30,0.12);border-radius:8px;overflow:hidden;margin-bottom:48px;}
+.stat-block{background:var(--navy-mid);padding:32px 18px;text-align:center;}
+.stat-num{font-family:'Black Han Sans',sans-serif;font-size:2.8rem;color:var(--gold);line-height:1;}
+.stat-unit{font-size:1.4rem;color:var(--gold-light);}
+.stat-label{font-size:.73rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-top:6px;line-height:1.4;}
+.reason-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;}
+.reason-card{background:var(--navy-mid);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:28px 24px;transition:border-color .2s,transform .2s;position:relative;overflow:hidden;}
+.reason-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s ease;}
+.reason-card:hover::before{transform:scaleX(1);}
+.reason-card:hover{border-color:rgba(232,168,30,.3);transform:translateY(-4px);}
+.reason-icon{font-size:2.2rem;margin-bottom:14px;display:block;}
+.reason-card h3{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);margin-bottom:10px;}
+.reason-card p{font-size:.87rem;color:var(--gray);line-height:1.7;}
+.stat-callout{display:inline-block;margin-top:12px;background:rgba(232,168,30,.12);border:1px solid rgba(232,168,30,.25);border-radius:4px;padding:5px 12px;font-size:.72rem;font-weight:700;letter-spacing:1px;color:var(--gold-light);text-transform:uppercase;}
+.heat-banner{margin-top:40px;background:linear-gradient(135deg,rgba(232,100,30,.12) 0%,rgba(22,47,92,.9) 100%);border:1px solid rgba(232,120,30,.3);border-radius:10px;padding:36px 40px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+.heat-icon{font-size:3.5rem;flex-shrink:0;}
+.heat-banner h3{font-family:'Black Han Sans',sans-serif;font-size:1.4rem;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:8px;}
+.heat-banner p{font-size:.9rem;color:var(--gray);line-height:1.7;max-width:540px;}
+.heat-banner p strong{color:var(--gold-light);}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2px;background:rgba(232,168,30,0.1);border-radius:8px;overflow:hidden;}
+.step{background:var(--navy-mid);padding:36px 28px;position:relative;transition:background 0.2s;}
+.step:hover{background:#1d3a6e;}
+.step-num{font-family:'Black Han Sans',sans-serif;font-size:4rem;color:rgba(232,168,30,0.15);line-height:1;position:absolute;top:16px;right:20px;}
+.step-icon{font-size:2rem;margin-bottom:16px;}
+.step h3{font-family:'Black Han Sans',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.step p{font-size:0.88rem;line-height:1.6;color:var(--gray);}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;}
+.price-card{background:var(--navy-mid);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:36px 28px;position:relative;transition:transform 0.2s,border-color 0.2s;}
+.price-card:hover{transform:translateY(-4px);border-color:rgba(232,168,30,0.3);}
+.price-card.featured{border-color:var(--gold);background:linear-gradient(160deg,#1d3a6e 0%,var(--navy-mid) 100%);}
+.featured-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy-dark);font-weight:700;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;padding:4px 16px;border-radius:20px;white-space:nowrap;}
+.price-card h3{font-family:'Black Han Sans',sans-serif;font-size:1.5rem;letter-spacing:2px;color:var(--white);margin-bottom:6px;}
+.price-desc{font-size:0.85rem;color:var(--gray);margin-bottom:24px;line-height:1.5;}
+.price-amount{font-family:'Black Han Sans',sans-serif;font-size:3.2rem;color:var(--gold);line-height:1;}
+.price-amount sup{font-size:1.4rem;vertical-align:top;margin-top:8px;display:inline-block;}
+.price-per{font-size:0.8rem;color:var(--gray);margin-bottom:28px;}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+.price-features li{font-size:0.88rem;color:var(--gray);display:flex;align-items:flex-start;gap:10px;line-height:1.4;}
+.price-features li::before{content:'✓';color:var(--green-bright);font-weight:700;flex-shrink:0;}
+.btn-price{width:100%;font-family:'Arimo',sans-serif;font-weight:700;font-size:0.92rem;letter-spacing:2px;text-transform:uppercase;padding:14px;border-radius:4px;cursor:pointer;transition:all 0.2s;border:none;}
+.btn-price-gold{background:var(--gold);color:var(--navy-dark);}
+.btn-price-gold:hover{background:var(--gold-light);}
+.btn-price-outline{background:transparent;border:1.5px solid rgba(255,255,255,0.25);color:var(--white);}
+.btn-price-outline:hover{border-color:var(--gold);color:var(--gold);}
+.pricing-note{text-align:center;margin-top:32px;font-size:0.85rem;color:var(--gray);}
+.pricing-note strong{color:var(--green-bright);}
+.stink-banner{background:linear-gradient(135deg,rgba(232,168,30,0.12) 0%,rgba(22,47,92,0.9) 100%);border-top:1px solid rgba(232,168,30,0.2);border-bottom:1px solid rgba(232,168,30,0.2);padding:28px 24px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;text-align:center;}
+.stink-banner p{font-family:'Black Han Sans',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--white);}
+.stink-banner p em{color:var(--gold);font-style:normal;}
+.area-hero{background:var(--navy-mid);border-radius:10px;padding:48px 36px;text-align:center;margin-bottom:32px;border:1px solid rgba(232,168,30,0.12);position:relative;overflow:hidden;}
+.area-hero h2{font-family:'Black Han Sans',sans-serif;font-size:clamp(2rem,5vw,3rem);letter-spacing:3px;color:var(--white);margin-bottom:12px;}
+.area-hero p{color:var(--gray);font-size:1rem;line-height:1.6;max-width:480px;margin:0 auto 28px;}
+.city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.city-pill{background:var(--navy-mid);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:0.95rem;font-weight:600;color:var(--white);transition:border-color 0.2s;}
+.city-pill:hover{border-color:var(--gold);}
+.city-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.area-cta{background:linear-gradient(135deg,rgba(232,168,30,0.1) 0%,rgba(22,47,92,0.8) 100%);border:1px solid rgba(232,168,30,0.25);border-radius:10px;padding:40px;text-align:center;margin-top:32px;}
+.area-cta h3{font-family:'Black Han Sans',sans-serif;font-size:2rem;letter-spacing:2px;margin-bottom:10px;color:var(--white);}
+.area-cta p{color:var(--gray);margin-bottom:24px;font-size:0.95rem;}
+.book-wrap{max-width:760px;margin:0 auto;padding:64px 24px;}
+.book-header{text-align:center;margin-bottom:48px;}
+.book-header h2{font-family:'Black Han Sans',sans-serif;font-size:clamp(2rem,5vw,3rem);letter-spacing:3px;color:var(--white);margin-bottom:10px;}
+.book-header h2 span{color:var(--gold);}
+.book-header p{color:var(--gray);font-size:0.95rem;}
+.progress-bar{display:flex;align-items:center;justify-content:center;margin-bottom:48px;}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.prog-dot{width:36px;height:36px;border-radius:50%;background:var(--navy-mid);border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans',sans-serif;font-size:0.9rem;color:var(--gray);transition:all 0.3s;}
+.prog-dot.active{background:var(--gold);border-color:var(--gold);color:var(--navy-dark);}
+.prog-dot.done{background:var(--green);border-color:var(--green);color:#fff;}
+.prog-label{font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);}
+.prog-label.active{color:var(--gold);}
+.prog-line{width:60px;height:2px;background:rgba(255,255,255,0.1);margin-bottom:22px;transition:background 0.3s;}
+.prog-line.done{background:var(--green);}
+.book-step{display:none;}
+.book-step.active{display:block;animation:fadeUp 0.3s ease;}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
+@media(max-width:520px){.plan-grid{grid-template-columns:1fr;}}
+.plan-card{background:var(--navy-mid);border:2px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px 24px;cursor:pointer;transition:all 0.2s;position:relative;}
+.plan-card:hover{border-color:rgba(232,168,30,0.4);transform:translateY(-3px);}
+.plan-card.selected{border-color:var(--gold);background:linear-gradient(160deg,#1d3a6e 0%,var(--navy-mid) 100%);}
+.plan-card .plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy-dark);font-weight:700;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;padding:3px 14px;border-radius:20px;white-space:nowrap;}
+.plan-card h3{font-family:'Black Han Sans',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--white);margin-bottom:4px;}
+.plan-price{font-family:'Black Han Sans',sans-serif;font-size:2.6rem;color:var(--gold);line-height:1;margin:12px 0 4px;}
+.plan-price span{font-size:1rem;color:var(--gray);}
+.plan-desc{font-size:0.85rem;color:var(--gray);line-height:1.55;margin-bottom:16px;}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.plan-features li{font-size:0.85rem;color:var(--gray);display:flex;gap:8px;}
+.plan-features li::before{content:'✓';color:var(--green-bright);font-weight:700;flex-shrink:0;}
+.freq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
+@media(max-width:480px){.freq-grid{grid-template-columns:1fr;}}
+.freq-card{background:var(--navy-mid);border:2px solid rgba(255,255,255,0.08);border-radius:10px;padding:28px 24px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.freq-card:hover{border-color:rgba(232,168,30,0.4);}
+.freq-card.selected{border-color:var(--gold);}
+.freq-icon{font-size:2.4rem;margin-bottom:10px;}
+.freq-card h3{font-family:'Black Han Sans',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--white);margin-bottom:6px;}
+.freq-card p{font-size:0.85rem;color:var(--gray);line-height:1.5;}
+.freq-savings{display:inline-block;margin-top:10px;background:rgba(109,217,109,0.12);border:1px solid rgba(109,217,109,0.3);border-radius:4px;padding:3px 10px;font-size:0.72rem;font-weight:700;letter-spacing:1px;color:var(--green-bright);text-transform:uppercase;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.form-group{margin-bottom:18px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{display:block;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+.form-group input,.form-group textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:12px 14px;color:var(--white);font-family:'Arimo',sans-serif;font-size:0.95rem;transition:border-color 0.2s;outline:none;}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--gold);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.confirm-card{background:var(--navy-mid);border:1px solid rgba(232,168,30,0.2);border-radius:12px;padding:36px;margin-bottom:24px;}
+.confirm-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-label{font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);}
+.confirm-value{font-weight:700;color:var(--white);text-align:right;max-width:60%;}
+.confirm-total{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;color:var(--gold);}
+.book-nav{display:flex;justify-content:space-between;align-items:center;margin-top:32px;gap:16px;}
+.btn-back{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.88rem;letter-spacing:1.5px;text-transform:uppercase;padding:13px 24px;background:transparent;border:1.5px solid rgba(255,255,255,0.2);color:var(--gray);border-radius:4px;cursor:pointer;transition:all 0.2s;}
+.btn-back:hover{border-color:var(--gold);color:var(--gold);}
+.btn-next{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:2px;text-transform:uppercase;padding:15px 36px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:4px;cursor:pointer;transition:all 0.2s;flex:1;max-width:280px;}
+.btn-next:hover{background:var(--gold-light);}
+.btn-next:disabled{background:rgba(232,168,30,0.3);cursor:not-allowed;}
+.book-success{display:none;text-align:center;padding:48px 24px;}
+.book-success .success-icon{font-size:4rem;margin-bottom:16px;}
+.book-success h3{font-family:'Black Han Sans',sans-serif;font-size:2.2rem;letter-spacing:3px;color:var(--green-bright);margin-bottom:10px;}
+.book-success p{color:var(--gray);font-size:0.95rem;line-height:1.7;max-width:420px;margin:0 auto 24px;}
+#adminOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;}
+#adminOverlay.show{display:flex;}
+.admin-login{background:var(--navy-mid);border:1px solid rgba(232,168,30,0.3);border-radius:12px;padding:48px 40px;width:min(400px,90vw);text-align:center;position:relative;}
+.admin-login h2{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);margin-bottom:8px;}
+.admin-login p{font-size:0.85rem;color:var(--gray);margin-bottom:28px;}
+.admin-login input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:13px 16px;color:var(--white);font-family:'Arimo',sans-serif;font-size:1rem;outline:none;margin-bottom:14px;}
+.admin-err{font-size:0.82rem;color:#ff6b6b;margin-bottom:12px;display:none;}
+.admin-close-btn{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--gray);font-size:1.4rem;cursor:pointer;}
+#adminPanel{display:none;position:fixed;inset:0;background:var(--navy-dark);z-index:1000;overflow-y:auto;padding:32px 24px;}
+#adminPanel.show{display:block;}
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid rgba(232,168,30,0.2);flex-wrap:wrap;gap:12px;}
+.admin-header h1{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:36px;}
+.admin-stat{background:var(--navy-mid);border:1px solid rgba(232,168,30,0.12);border-radius:8px;padding:24px 20px;text-align:center;}
+.admin-stat .num{font-family:'Black Han Sans',sans-serif;font-size:2.4rem;color:var(--gold);line-height:1;}
+.admin-stat .lbl{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:6px;}
+.admin-section-title{font-family:'Black Han Sans',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--white);margin-bottom:16px;text-transform:uppercase;}
+.pricing-editor{background:var(--navy-mid);border:1px solid rgba(232,168,30,0.15);border-radius:10px;padding:28px;margin-bottom:36px;}
+.price-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:500px){.price-edit-grid{grid-template-columns:1fr;}}
+.price-edit-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:20px;}
+.price-edit-card h4{font-family:'Black Han Sans',sans-serif;color:var(--white);margin-bottom:14px;}
+.price-edit-card label{display:block;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:5px;margin-top:12px;}
+.price-edit-card input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:10px 12px;color:var(--white);font-family:'Arimo',sans-serif;font-size:0.95rem;outline:none;}
+.btn-save-pricing{margin-top:20px;font-family:'Arimo',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;padding:13px 32px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:4px;cursor:pointer;}
+.save-confirm{display:none;color:var(--green-bright);font-size:0.85rem;margin-top:10px;}
+.entries-wrap{background:var(--navy-mid);border:1px solid rgba(232,168,30,0.15);border-radius:10px;padding:28px;margin-bottom:36px;overflow-x:auto;}
+.entries-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.entries-table th{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);white-space:nowrap;}
+.entries-table td{padding:14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--white);vertical-align:top;}
+.entry-plan{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.plan-sub{background:rgba(232,168,30,0.15);color:var(--gold);}
+.plan-one{background:rgba(109,217,109,0.12);color:var(--green-bright);}
+.no-entries{text-align:center;color:var(--gray);padding:32px;font-size:0.9rem;}
+.btn-admin-logout{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;background:transparent;border:1.5px solid rgba(255,255,255,0.2);color:var(--gray);border-radius:4px;cursor:pointer;}
+.btn-admin-logout:hover{border-color:#ff6b6b;color:#ff6b6b;}
+.btn-export{font-family:'Arimo',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;background:var(--navy-mid);border:1.5px solid rgba(232,168,30,0.3);color:var(--gold);border-radius:4px;cursor:pointer;}
+footer{border-top:1px solid rgba(255,255,255,0.06);padding:28px 24px;text-align:center;color:var(--gray);font-size:0.8rem;}
+footer strong{color:var(--gold);}
+@media(max-width:600px){.tab-btn{padding:8px 12px;font-size:0.72rem;}}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-logo">Clean <span>Bin</span> Shine</div>
-  <div class="topbar-contact">
-    📞 <a href="tel:6822226518">(682) 222-6518</a><br>
-    📍 Fort Worth / Dallas, TX
-  </div>
+  <div class="topbar-logo" id="logoTap">Clean <span>Bin</span> Shine</div>
+  <div class="topbar-contact">📞 <a href="tel:6822226518">(682) 222-6518</a><br>📍 Fort Worth / Dallas, TX</div>
 </div>
 
-<!-- TAB NAV -->
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('hero')">Home</button>
   <button class="tab-btn" onclick="switchTab('why')">Why It Matters</button>
@@ -801,31 +235,18 @@
 </div>
 <div class="tab-line"></div>
 
-<!-- ══════════ HOME ══════════ -->
 <div id="tab-hero" class="tab-panel active">
   <div class="hero">
-    <!-- TOP: Arch name -->
     <div class="hero-arch">Clean <span style="color:var(--gold)">Bin</span> Shine</div>
-
-    <!-- CENTER: Bin image -->
     <div class="hero-visual">
-      <div class="ring"></div>
-      <div class="ring ring2"></div>
+      <div class="ring"></div><div class="ring ring2"></div>
       <div class="bin-wrap">
-        <img id="binImg" src="./Clean%20bin.png" alt="Clean Bin Shine — sparkling clean bin" onerror="this.style.display='none'">
-        <div class="sparkle sp1">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 5L33 25L53 28L33 31L30 55L27 31L7 28L27 25L30 5Z" fill="white" opacity="0.9"/></svg>
-        </div>
-        <div class="sparkle sp2">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 8L32.5 26L50 28.5L32.5 31L30 52L27.5 31L10 28.5L27.5 26L30 8Z" fill="#e8a81e" opacity="0.85"/></svg>
-        </div>
-        <div class="sparkle sp3">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 10L32 24L46 26L32 28L30 50L28 28L14 26L28 24L30 10Z" fill="white" opacity="0.7"/></svg>
-        </div>
+        <img src="./Clean%20bin.png" alt="Clean sparkling bin" onerror="this.style.opacity='0'">
+        <div class="sparkle sp1"><svg viewBox="0 0 60 60" fill="none"><path d="M30 5L33 25L53 28L33 31L30 55L27 31L7 28L27 25L30 5Z" fill="white" opacity="0.9"/></svg></div>
+        <div class="sparkle sp2"><svg viewBox="0 0 60 60" fill="none"><path d="M30 8L32.5 26L50 28.5L32.5 31L30 52L27.5 31L10 28.5L27.5 26L30 8Z" fill="#e8a81e" opacity="0.85"/></svg></div>
+        <div class="sparkle sp3"><svg viewBox="0 0 60 60" fill="none"><path d="M30 10L32 24L46 26L32 28L30 50L28 28L14 26L28 24L30 10Z" fill="white" opacity="0.7"/></svg></div>
       </div>
     </div>
-
-    <!-- BOTTOM: Tagline + CTA -->
     <p class="hero-tagline">We Handle the Nasty So You Don't Have To 🫧</p>
     <p class="hero-desc">Your bins work hard — they deserve a deep clean too. We come to you, sanitize, deodorize, and leave them looking like new. Hands-off. Every time.</p>
     <div class="hero-cta-row">
@@ -840,2478 +261,404 @@
   </div>
 </div>
 
-<!-- ══════════ WHY IT MATTERS ══════════ -->
 <div id="tab-why" class="tab-panel">
   <div class="section">
     <div class="section-label">The Real Reason</div>
     <h2 class="section-title">More Than Just <span>the Smell</span></h2>
     <p class="section-sub">Your trash bin is one of the dirtiest surfaces on your property. Here's why it matters more than you think.</p>
-
     <div class="stat-row">
-      <div class="stat-block">
-        <div class="stat-num">99<span class="stat-unit">%</span></div>
-        <div class="stat-label">Bacteria Eliminated Per Clean</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">20<span class="stat-unit">min</span></div>
-        <div class="stat-label">How Fast Bacteria Doubles in Heat</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">106<span class="stat-unit">°F</span></div>
-        <div class="stat-label">Avg DFW Summer Temps</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">90<span class="stat-unit">%</span></div>
-        <div class="stat-label">Homeowners Never Clean Their Bins</div>
-      </div>
+      <div class="stat-block"><div class="stat-num">99<span class="stat-unit">%</span></div><div class="stat-label">Bacteria Eliminated Per Clean</div></div>
+      <div class="stat-block"><div class="stat-num">20<span class="stat-unit">min</span></div><div class="stat-label">How Fast Bacteria Doubles in Heat</div></div>
+      <div class="stat-block"><div class="stat-num">106<span class="stat-unit">°F</span></div><div class="stat-label">Avg DFW Summer Temps</div></div>
+      <div class="stat-block"><div class="stat-num">90<span class="stat-unit">%</span></div><div class="stat-label">Homeowners Never Clean Their Bins</div></div>
     </div>
-
     <div class="reason-grid">
-      <div class="reason-card">
-        <span class="reason-icon">🦠</span>
-        <h3>Bacteria & Pathogens</h3>
-        <p>Dirty bins breed E. coli, salmonella, and mold — especially after food waste sits in Texas heat.</p>
-        <div class="stat-callout">Up to 10M bacteria / sq inch</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🐜</span>
-        <h3>Pests & Infestations</h3>
-        <p>Residue and odor attract flies, maggots, roaches, and rodents straight to your front curb.</p>
-        <div class="stat-callout">Flies detect odor from 4 miles</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🌡️</span>
-        <h3>DFW Heat</h3>
-        <p>Triple-digit summers turn a neglected bin into a biohazard fast. Regular cleaning keeps it controlled.</p>
-        <div class="stat-callout">100°F+ accelerates growth 5x</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🏡</span>
-        <h3>Curb Appeal</h3>
-        <p>A clean bin is a small detail that says a lot about how you take care of your home and property.</p>
-        <div class="stat-callout">First impressions start at the curb</div>
-      </div>
+      <div class="reason-card"><span class="reason-icon">🦠</span><h3>Bacteria & Pathogens</h3><p>Dirty bins breed E. coli, salmonella, and mold — especially after food waste sits in Texas heat.</p><div class="stat-callout">Up to 10M bacteria / sq inch</div></div>
+      <div class="reason-card"><span class="reason-icon">🐜</span><h3>Pests & Infestations</h3><p>Residue and odor attract flies, maggots, roaches, and rodents straight to your front curb.</p><div class="stat-callout">Flies detect odor from 4 miles</div></div>
+      <div class="reason-card"><span class="reason-icon">🌡️</span><h3>DFW Heat</h3><p>Triple-digit summers turn a neglected bin into a biohazard fast. Regular cleaning keeps it controlled.</p><div class="stat-callout">100°F+ accelerates growth 5x</div></div>
+      <div class="reason-card"><span class="reason-icon">🏡</span><h3>Curb Appeal</h3><p>A clean bin says a lot about how you take care of your home and property.</p><div class="stat-callout">First impressions start at the curb</div></div>
     </div>
-
-    <div class="heat-banner">
-      <div class="heat-icon">☀️</div>
-      <div>
-        <h3>DFW Summers Are No Joke</h3>
-        <p>When it's <strong>100°F+ outside</strong>, your bin turns into an oven. Bacteria multiplies faster, odors get worse, and pests move in quick. That's not a summer problem — that's a <strong>year-round DFW reality</strong>. Monthly service keeps it from ever getting that bad.</p>
-      </div>
-    </div>
+    <div class="heat-banner"><div class="heat-icon">☀️</div><div><h3>DFW Summers Are No Joke</h3><p>When it's <strong>100°F+ outside</strong>, your bin turns into an oven. Bacteria multiplies faster, odors get worse, and pests move in quick. That's a <strong>year-round DFW reality</strong>.</p></div></div>
   </div>
 </div>
 
-<!-- ══════════ HOW IT WORKS ══════════ -->
 <div id="tab-how" class="tab-panel">
   <div class="section">
     <div class="section-label">The Process</div>
     <h2 class="section-title">Simple. Fast. <span>Spotless.</span></h2>
     <p class="section-sub">We handle everything. You do nothing. That's kind of the whole point.</p>
     <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-icon">📅</div>
-        <h3>Book Online or Call</h3>
-        <p>Schedule a one-time clean or set up recurring service in minutes. We work around your pickup day.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-icon">🚛</div>
-        <h3>We Roll Up to You</h3>
-        <p>Our crew shows up with professional-grade equipment — no driveway hookups or hoses from you needed.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-icon">💦</div>
-        <h3>Deep Clean & Sanitize</h3>
-        <p>We pressure wash, deodorize, and sanitize inside and out. Bacteria? Gone. Smell? Gone.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-icon">✨</div>
-        <h3>Fresh Bin, Every Time</h3>
-        <p>We put your bins back exactly where we found them — sparkling clean, zero effort from you.</p>
-      </div>
+      <div class="step"><div class="step-num">01</div><div class="step-icon">📅</div><h3>Book Online or Call</h3><p>Schedule a one-time clean or set up recurring service in minutes. We work around your pickup day.</p></div>
+      <div class="step"><div class="step-num">02</div><div class="step-icon">🚛</div><h3>We Roll Up to You</h3><p>Our crew shows up with professional-grade equipment — no driveway hookups needed.</p></div>
+      <div class="step"><div class="step-num">03</div><div class="step-icon">💦</div><h3>Deep Clean & Sanitize</h3><p>We pressure wash, deodorize, and sanitize inside and out. Bacteria? Gone. Smell? Gone.</p></div>
+      <div class="step"><div class="step-num">04</div><div class="step-icon">✨</div><h3>Fresh Bin, Every Time</h3><p>We put your bins back exactly where we found them — sparkling clean, zero effort from you.</p></div>
     </div>
   </div>
 </div>
 
-<!-- ══════════ PRICING ══════════ -->
 <div id="tab-pricing" class="tab-panel">
   <div class="section">
     <div class="section-label">Simple & Transparent</div>
     <h2 class="section-title">Two Options. <span>That's It.</span></h2>
-    <p class="section-sub">No complicated tiers. No hidden fees. Just clean bins — pay after service, no deposit ever.</p>
-
+    <p class="section-sub">No complicated tiers. No hidden fees. Pay after service — no deposit ever.</p>
     <div class="pricing-grid" style="max-width:640px;margin:0 auto 32px;">
-
-      <!-- ONE-TIME -->
       <div class="price-card">
         <h3>One-Time Clean</h3>
         <p class="price-desc">Try us out. One bin, full service — no strings attached.</p>
-        <div class="price-amount"><sup>$</sup>25</div>
-        <p class="price-per">per bin · one-time visit</p>
-        <ul class="price-features">
-          <li>Hot water pressure wash</li>
-          <li>Interior scrub & sanitize</li>
-          <li>Deodorizer treatment</li>
-          <li>Exterior rinse & shine</li>
-          <li>No commitment required</li>
-        </ul>
+        <div class="price-amount" id="priceOnetime"><sup>$</sup>25</div>
+        <p class="price-per" id="descOnetime">per bin · one-time visit</p>
+        <ul class="price-features"><li>Hot water pressure wash</li><li>Interior scrub & sanitize</li><li>Deodorizer treatment</li><li>Exterior rinse & shine</li><li>No commitment required</li></ul>
         <button class="btn-price btn-price-outline" onclick="switchTab('book')">Book Now</button>
       </div>
-
-      <!-- MONTHLY SUBSCRIPTION -->
       <div class="price-card featured">
         <div class="featured-badge">Most Popular</div>
         <h3>Monthly Subscription</h3>
-        <p class="price-desc">Up to 3 bins, cleaned twice a month. Under $40 — cancel anytime.</p>
-        <div class="price-amount"><sup>$</sup>37</div>
-        <p class="price-per">per month · up to 3 bins · 2x/month</p>
-        <ul class="price-features">
-          <li>Up to 3 bins covered</li>
-          <li>2 cleanings per month</li>
-          <li>Full sanitize & deodorize every visit</li>
-          <li>Scheduled around your pickup day</li>
-          <li>Cancel anytime — no contracts</li>
-        </ul>
+        <p class="price-desc">Up to 3 bins, twice a month. Under $40 — cancel anytime.</p>
+        <div class="price-amount" id="priceSub"><sup>$</sup>37</div>
+        <p class="price-per" id="descSub">per month · up to 3 bins · 2x/month</p>
+        <ul class="price-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Full sanitize & deodorize every visit</li><li>Scheduled around your pickup day</li><li>Cancel anytime — no contracts</li></ul>
         <button class="btn-price btn-price-gold" onclick="switchTab('book')">Subscribe — Under $40</button>
       </div>
-
     </div>
-
     <p class="pricing-note">💳 Payment collected after service is complete — <strong>no deposit required.</strong> All major cards accepted.</p>
   </div>
-
-  <!-- stink banner -->
   <div class="stink-banner">
     <p>Still living with that smell? <em>Yeah, we know.</em> 👃</p>
     <button class="btn-primary" onclick="switchTab('book')">Book Your First Clean</button>
   </div>
 </div>
 
-<!-- ══════════ SERVICE AREA ══════════ -->
 <div id="tab-area" class="tab-panel">
   <div class="section">
-    <div class="area-hero">
-      <h2>Proudly Serving DFW</h2>
-      <p>We cover Fort Worth, Dallas, and surrounding cities across the Metroplex. Not sure if we come to you? Give us a call — we're always expanding.</p>
-      <button class="btn-primary" onclick="switchTab('book')">Check My Area</button>
-    </div>
+    <div class="area-hero"><h2>Proudly Serving DFW</h2><p>We cover Fort Worth, Dallas, and surrounding cities. Not sure if we come to you? Give us a call.</p><button class="btn-primary" onclick="switchTab('book')">Check My Area</button></div>
     <div class="section-label">Active Service Zones</div>
     <div class="city-grid">
-      <div class="city-pill"><div class="city-dot"></div>Fort Worth</div>
-      <div class="city-pill"><div class="city-dot"></div>Dallas</div>
-      <div class="city-pill"><div class="city-dot"></div>Arlington</div>
-      <div class="city-pill"><div class="city-dot"></div>Mansfield</div>
-      <div class="city-pill"><div class="city-dot"></div>Burleson</div>
-      <div class="city-pill"><div class="city-dot"></div>Crowley</div>
-      <div class="city-pill"><div class="city-dot"></div>Kennedale</div>
-      <div class="city-pill"><div class="city-dot"></div>Grand Prairie</div>
-      <div class="city-pill"><div class="city-dot"></div>Irving</div>
-      <div class="city-pill"><div class="city-dot"></div>Euless</div>
-      <div class="city-pill"><div class="city-dot"></div>Bedford</div>
-      <div class="city-pill"><div class="city-dot"></div>Hurst</div>
-      <div class="city-pill"><div class="city-dot"></div>Haltom City</div>
-      <div class="city-pill"><div class="city-dot"></div>North Richland Hills</div>
-      <div class="city-pill"><div class="city-dot"></div>Keller</div>
-      <div class="city-pill"><div class="city-dot"></div>Saginaw</div>
+      <div class="city-pill"><div class="city-dot"></div>Fort Worth</div><div class="city-pill"><div class="city-dot"></div>Dallas</div><div class="city-pill"><div class="city-dot"></div>Arlington</div><div class="city-pill"><div class="city-dot"></div>Mansfield</div><div class="city-pill"><div class="city-dot"></div>Burleson</div><div class="city-pill"><div class="city-dot"></div>Crowley</div><div class="city-pill"><div class="city-dot"></div>Kennedale</div><div class="city-pill"><div class="city-dot"></div>Grand Prairie</div><div class="city-pill"><div class="city-dot"></div>Irving</div><div class="city-pill"><div class="city-dot"></div>Euless</div><div class="city-pill"><div class="city-dot"></div>Bedford</div><div class="city-pill"><div class="city-dot"></div>Hurst</div><div class="city-pill"><div class="city-dot"></div>Haltom City</div><div class="city-pill"><div class="city-dot"></div>North Richland Hills</div><div class="city-pill"><div class="city-dot"></div>Keller</div><div class="city-pill"><div class="city-dot"></div>Saginaw</div>
     </div>
-    <div class="area-cta">
-      <h3>Don't See Your City?</h3>
-      <p>We're growing fast. Reach out and we'll let you know — or add you to our waitlist for your area.</p>
-      <button class="btn-primary" onclick="switchTab('book')">Contact Us</button>
-    </div>
+    <div class="area-cta"><h3>Don't See Your City?</h3><p>We're growing fast. Reach out and we'll let you know — or add you to our waitlist.</p><button class="btn-primary" onclick="switchTab('book')">Contact Us</button></div>
   </div>
 </div>
 
-<!-- ══════════ BOOK NOW ══════════ -->
 <div id="tab-book" class="tab-panel">
   <div class="book-wrap">
-    <div class="book-header">
-      <h2>Let's Get Your <span>Bins Clean</span></h2>
-      <p>Pick your plan, tell us where you are, and we'll handle the rest.</p>
-    </div>
-
-    <!-- PROGRESS -->
+    <div class="book-header"><h2>Let's Get Your <span>Bins Clean</span></h2><p>Pick your plan, tell us where you are, and we'll handle the rest.</p></div>
     <div class="progress-bar">
-      <div class="prog-step">
-        <div class="prog-dot active" id="pd1">1</div>
-        <div class="prog-label active" id="pl1">Plan</div>
-      </div>
+      <div class="prog-step"><div class="prog-dot active" id="pd1">1</div><div class="prog-label active" id="pl1">Plan</div></div>
       <div class="prog-line" id="pline1"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd2">2</div>
-        <div class="prog-label" id="pl2">Frequency</div>
-      </div>
+      <div class="prog-step"><div class="prog-dot" id="pd2">2</div><div class="prog-label" id="pl2">Frequency</div></div>
       <div class="prog-line" id="pline2"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd3">3</div>
-        <div class="prog-label" id="pl3">Address</div>
-      </div>
+      <div class="prog-step"><div class="prog-dot" id="pd3">3</div><div class="prog-label" id="pl3">Address</div></div>
       <div class="prog-line" id="pline3"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd4">4</div>
-        <div class="prog-label" id="pl4">Confirm</div>
-      </div>
+      <div class="prog-step"><div class="prog-dot" id="pd4">4</div><div class="prog-label" id="pl4">Confirm</div></div>
     </div>
-
-    <!-- STEP 1: PLAN -->
     <div class="book-step active" id="step1">
       <div class="plan-grid">
-        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')">
-          <h3>One-Time Clean</h3>
-          <div class="plan-price">$25 <span>/ bin</span></div>
-          <p class="plan-desc">One bin, full service. No commitment.</p>
-          <ul class="plan-features">
-            <li>Hot water pressure wash</li>
-            <li>Sanitized & deodorized</li>
-            <li>Pay after service</li>
-            <li>No contract</li>
-          </ul>
-        </div>
-        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')">
-          <div class="plan-badge">Under $40</div>
-          <h3>Monthly Subscription</h3>
-          <div class="plan-price">$37 <span>/ mo</span></div>
-          <p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p>
-          <ul class="plan-features">
-            <li>Up to 3 bins covered</li>
-            <li>2 cleanings per month</li>
-            <li>Sanitized & deodorized</li>
-            <li>Scheduled around pickup day</li>
-          </ul>
-        </div>
+        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')"><h3>One-Time Clean</h3><div class="plan-price" id="bookPriceOnetime">$25 <span>/ bin</span></div><p class="plan-desc">One bin, full service. No commitment.</p><ul class="plan-features"><li>Hot water pressure wash</li><li>Sanitized &amp; deodorized</li><li>Pay after service</li><li>No contract</li></ul></div>
+        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')"><div class="plan-badge">Under $40</div><h3>Monthly Subscription</h3><div class="plan-price" id="bookPriceSub">$37 <span>/ mo</span></div><p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p><ul class="plan-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Sanitized &amp; deodorized</li><li>Scheduled around pickup day</li></ul></div>
       </div>
-      <div class="book-nav" style="justify-content:flex-end">
-        <button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Continue →</button>
-      </div>
+      <div class="book-nav" style="justify-content:flex-end"><button class="btn-next" id="btn1" disabled>Continue →</button></div>
     </div>
-
-    <!-- STEP 2: FREQUENCY -->
     <div class="book-step" id="step2">
       <div class="freq-grid">
-        <div class="freq-card" id="freqMonthly" onclick="selectFreq('monthly')">
-          <div class="freq-icon">📅</div>
-          <h3>Monthly</h3>
-          <p>Once a month, right after pickup day. Set it and forget it.</p>
-          <div class="freq-savings">Most popular</div>
-        </div>
-        <div class="freq-card" id="freqBimonthly" onclick="selectFreq('bimonthly')">
-          <div class="freq-icon">⚡</div>
-          <h3>Bi-Monthly</h3>
-          <p>Twice a month for heavy-use households or families. Always fresh.</p>
-          <div class="freq-savings">Best coverage · save more</div>
-        </div>
+        <div class="freq-card" id="freqMonthly" onclick="selectFreq('monthly')"><div class="freq-icon">📅</div><h3>Monthly</h3><p>Once a month, right after pickup day.</p><div class="freq-savings">Most popular</div></div>
+        <div class="freq-card" id="freqBimonthly" onclick="selectFreq('bimonthly')"><div class="freq-icon">⚡</div><h3>Bi-Monthly</h3><p>Twice a month for heavy-use households.</p><div class="freq-savings">Best coverage</div></div>
       </div>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(1)">← Back</button>
-        <button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Continue →</button>
-      </div>
+      <div class="book-nav"><button class="btn-back" onclick="goStep(1)">← Back</button><button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Continue →</button></div>
     </div>
-
-    <!-- STEP 3: ADDRESS -->
     <div class="book-step" id="step3">
       <div class="form-grid">
-        <div class="form-group">
-          <label>First Name</label>
-          <input type="text" id="fFirstName" placeholder="Maria" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Last Name</label>
-          <input type="text" id="fLastName" placeholder="Gonzalez" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="fPhone" placeholder="(682) 555-0100" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="fEmail" placeholder="you@email.com" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Street Address</label>
-          <input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>City</label>
-          <input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>ZIP Code</label>
-          <input type="text" id="fZip" placeholder="76101" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Preferred Service Date</label>
-          <input type="date" id="fDate" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Notes (optional)</label>
-          <textarea id="fNotes" placeholder="Gate code, pickup day, number of bins, one-time vs subscription, anything else..."></textarea>
-        </div>
+        <div class="form-group"><label>First Name</label><input type="text" id="fFirstName" placeholder="Maria" oninput="checkStep3()"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="fLastName" placeholder="Gonzalez" oninput="checkStep3()"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="fPhone" placeholder="(682) 555-0100" oninput="checkStep3()"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="fEmail" placeholder="you@email.com" oninput="checkStep3()"></div>
+        <div class="form-group full"><label>Street Address</label><input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep3()"></div>
+        <div class="form-group"><label>City</label><input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep3()"></div>
+        <div class="form-group"><label>ZIP Code</label><input type="text" id="fZip" placeholder="76101" oninput="checkStep3()"></div>
+        <div class="form-group full"><label>Preferred Service Date</label><input type="date" id="fDate" oninput="checkStep3()"></div>
+        <div class="form-group full"><label>Notes (optional)</label><textarea id="fNotes" placeholder="Gate code, pickup day, number of bins, anything else..."></textarea></div>
       </div>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(2)">← Back</button>
-        <button class="btn-next" id="btn3" onclick="goStep(4)" disabled>Review Order →</button>
-      </div>
+      <div class="book-nav"><button class="btn-back" onclick="goStep(2)">← Back</button><button class="btn-next" id="btn3" onclick="goStep(4)" disabled>Review Order →</button></div>
     </div>
-
-    <!-- STEP 4: CONFIRM -->
     <div class="book-step" id="step4">
       <div class="confirm-card">
-        <div class="confirm-row">
-          <span class="confirm-label">Plan</span>
-          <span class="confirm-value" id="c-plan">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Frequency</span>
-          <span class="confirm-value" id="c-freq">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Name</span>
-          <span class="confirm-value" id="c-name">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Phone</span>
-          <span class="confirm-value" id="c-phone">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Email</span>
-          <span class="confirm-value" id="c-email">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Address</span>
-          <span class="confirm-value" id="c-address">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Preferred Date</span>
-          <span class="confirm-value" id="c-date">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Price</span>
-          <span class="confirm-value confirm-total" id="c-price">—</span>
-        </div>
+        <div class="confirm-row"><span class="confirm-label">Plan</span><span class="confirm-value" id="c-plan">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Frequency</span><span class="confirm-value" id="c-freq">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Name</span><span class="confirm-value" id="c-name">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Phone</span><span class="confirm-value" id="c-phone">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Email</span><span class="confirm-value" id="c-email">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Address</span><span class="confirm-value" id="c-address">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Date</span><span class="confirm-value" id="c-date">—</span></div>
+        <div class="confirm-row"><span class="confirm-label">Price</span><span class="confirm-value confirm-total" id="c-price">—</span></div>
       </div>
-      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">
-        💳 We'll reach out to confirm your appointment. Payment is collected <strong style="color:var(--gold-light)">after service is complete</strong> — no deposit required. We'll schedule around your trash pickup day.<br><br>
-        📞 <a href="tel:6822226518" style="color:var(--gold);">(682) 222-6518</a> &nbsp;·&nbsp; ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);">cleanbinshine@gmail.com</a>
-      </p>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(3)">← Back</button>
-        <button class="btn-next" onclick="submitBooking()" style="max-width:100%;flex:1">Send My Request ✨</button>
-      </div>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">💳 Payment collected <strong style="color:var(--gold-light)">after service</strong> — no deposit required.<br>📞 <a href="tel:6822226518" style="color:var(--gold)">(682) 222-6518</a> · ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold)">cleanbinshine@gmail.com</a></p>
+      <div class="book-nav"><button class="btn-back" onclick="goStep(3)">← Back</button><button class="btn-next" style="max-width:100%;flex:1" onclick="submitBooking()">Send My Request ✨</button></div>
     </div>
-
-    <!-- SUCCESS -->
     <div class="book-success" id="bookSuccess">
       <div class="success-icon">✅</div>
       <h3>Request Sent!</h3>
-      <p>We'll reach out within a few hours to confirm your appointment. We schedule around your trash pickup day so the timing is always right. Talk soon!</p>
+      <p>We'll reach out within a few hours to confirm your appointment. We schedule around your trash pickup day.</p>
       <button class="btn-primary" onclick="resetBooking()">Book Another</button>
     </div>
   </div>
 </div>
 
-<footer>
-  &copy; 2026 <strong>Clean Bin Shine</strong> · Fort Worth / Dallas, TX · (682) 222-6518 · <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);text-decoration:none">cleanbinshine@gmail.com</a><br style="margin-top:6px">
-  We Handle the Nasty So You Don't Have To 🗑️✨
-</footer>
+<footer>&copy; 2026 <strong>Clean Bin Shine</strong> · Fort Worth / Dallas, TX · <a href="tel:6822226518" style="color:var(--gold);text-decoration:none">(682) 222-6518</a> · <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);text-decoration:none">cleanbinshine@gmail.com</a><br>We Handle the Nasty So You Don't Have To 🗑️✨</footer>
 
-<script>
-  // ── Bin image ──
-
-  // ── Tab switching ──
-  function switchTab(id) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    const labels = { hero:'Home', why:'Why It Matters', how:'How It Works', pricing:'Pricing', area:'Service Area', book:'Book Now' };
-    document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.trim() === labels[id]) b.classList.add('active'); });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ── Pricing toggle ──
-  function switchPricing(type, btn) {
-    document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('pricing-' + type).classList.add('active');
-    btn.classList.add('active');
-  }
-
-  // ── Booking state ──
-  let booking = { plan: '', freq: '' };
-
-  function selectPlan(p) {
-    booking.plan = p;
-    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById(p === 'onetime' ? 'planOnetime' : 'planSubscription').classList.add('selected');
-    document.getElementById('btn1').disabled = false;
-    // skip frequency step for one-time
-    document.getElementById('btn1').onclick = p === 'onetime' ? () => goStep(3) : () => goStep(2);
-  }
-
-  function selectFreq(f) {
-    booking.freq = f;
-    document.querySelectorAll('.freq-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById(f === 'monthly' ? 'freqMonthly' : 'freqBimonthly').classList.add('selected');
-    document.getElementById('btn2').disabled = false;
-  }
-
-  function checkStep3() {
-    const fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate'];
-    const ok = fields.every(id => document.getElementById(id).value.trim() !== '');
-    document.getElementById('btn3').disabled = !ok;
-  }
-
-  function goStep(n) {
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step' + n).classList.add('active');
-    updateProgress(n);
-    if (n === 4) fillConfirm();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function updateProgress(n) {
-    for (let i = 1; i <= 4; i++) {
-      const dot = document.getElementById('pd' + i);
-      const lbl = document.getElementById('pl' + i);
-      dot.classList.remove('active','done');
-      lbl.classList.remove('active');
-      if (i < n) { dot.classList.add('done'); dot.textContent = '✓'; }
-      else if (i === n) { dot.classList.add('active'); dot.textContent = i; lbl.classList.add('active'); }
-      else { dot.textContent = i; }
-    }
-    for (let i = 1; i <= 3; i++) {
-      const line = document.getElementById('pline' + i);
-      if (line) line.classList.toggle('done', i < n);
-    }
-  }
-
-  function fillConfirm() {
-    const planLabel = booking.plan === 'onetime' ? 'One-Time Clean — $25/bin' : 'Monthly Subscription — $37/mo (up to 3 bins, 2x/month)';
-    const freqLabel = booking.plan === 'onetime' ? 'One-time visit' : (booking.freq === 'monthly' ? 'Monthly (2x/month)' : 'Bi-Monthly');
-    const price = booking.plan === 'onetime' ? '$25 / bin' : '$37 / month';
-    document.getElementById('c-plan').textContent = planLabel;
-    document.getElementById('c-freq').textContent = freqLabel;
-    document.getElementById('c-name').textContent = document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value;
-    document.getElementById('c-phone').textContent = document.getElementById('fPhone').value;
-    document.getElementById('c-email').textContent = document.getElementById('fEmail').value;
-    document.getElementById('c-address').textContent = document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value;
-    document.getElementById('c-date').textContent = document.getElementById('fDate').value || 'Flexible';
-    document.getElementById('c-price').textContent = price;
-  }
-
-  function submitBooking() {
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.querySelector('.progress-bar').style.display = 'none';
-    document.getElementById('bookSuccess').style.display = 'block';
-  }
-
-  function resetBooking() {
-    booking = { plan: '', freq: '' };
-    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.freq-card').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('btn1').disabled = true;
-    document.getElementById('btn2').disabled = true;
-    document.querySelector('.progress-bar').style.display = 'flex';
-    document.getElementById('bookSuccess').style.display = 'none';
-    updateProgress(1);
-    ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate','fNotes'].forEach(id => { document.getElementById(id).value = ''; });
-  }
-
-  // ── SUPABASE (deferred until page fully loaded) ──
-  var _sb = null;
-  window.addEventListener('load', function() {
-    try { _sb = supabase.createClient('https://soixstllfmdkuijfgdxm.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvaXhzdGxsZm1ka3VpamZnZHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NzUyNTUsImV4cCI6MjA5MjE1MTI1NX0.ITMH75e-E-NeDvq2oVTEWA6RDhfXtlsgIaqcXdfYHq8'); } catch(e) { console.warn('Supabase not available in preview'); }
-
-  // ── ADMIN STATE ──
-  const ADMIN_PW = 'Dallas.2025!';
-  let logoTaps = 0;
-  let tapTimer = null;
-  let bookingEntries = [];
-  let pricing = { onetime: 25, onetimeDesc: 'per bin · one-time visit', sub: 37, subDesc: 'per month · up to 3 bins · 2x/month' };
-
-  // Secret tap on logo in topbar
-  document.querySelector('.topbar-logo').addEventListener('click', () => {
-    logoTaps++;
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => { logoTaps = 0; }, 2000);
-    if (logoTaps >= 5) {
-      logoTaps = 0;
-      document.getElementById('adminOverlay').classList.add('show');
-      setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
-    }
-  });
-
-  function checkAdminPw() {
-    const pw = document.getElementById('adminPwInput').value;
-    if (pw === ADMIN_PW) {
-      document.getElementById('adminOverlay').classList.remove('show');
-      document.getElementById('adminPwInput').value = '';
-      document.getElementById('adminErr').style.display = 'none';
-      openAdminPanel();
-    } else {
-      document.getElementById('adminErr').style.display = 'block';
-      document.getElementById('adminPwInput').value = '';
-    }
-  }
-
-  function closeAdmin() {
-    document.getElementById('adminOverlay').classList.remove('show');
-    document.getElementById('adminPwInput').value = '';
-    document.getElementById('adminErr').style.display = 'none';
-  }
-
-  async function openAdminPanel() {
-    document.getElementById('adminPanel').classList.add('show');
-    document.getElementById('entriesBody').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--gray)">Loading entries...</td></tr>';
-    await loadEntriesFromSupabase();
-    renderEntries();
-    updateStats();
-    // Load saved pricing into editor
-    document.getElementById('editOnetimePrice').value = pricing.onetime;
-    document.getElementById('editOnetimeDesc').value = pricing.onetimeDesc;
-    document.getElementById('editSubPrice').value = pricing.sub;
-    document.getElementById('editSubDesc').value = pricing.subDesc;
-  }
-
-  function logoutAdmin() {
-    document.getElementById('adminPanel').classList.remove('show');
-  }
-
-  function savePricing() {
-    pricing.onetime = parseFloat(document.getElementById('editOnetimePrice').value) || 25;
-    pricing.onetimeDesc = document.getElementById('editOnetimeDesc').value;
-    pricing.sub = parseFloat(document.getElementById('editSubPrice').value) || 37;
-    pricing.subDesc = document.getElementById('editSubDesc').value;
-
-    // Update pricing tab display
-    document.querySelectorAll('.price-amount').forEach((el, i) => {
-      if (i === 0) el.innerHTML = '<sup>$</sup>' + pricing.onetime;
-      if (i === 1) el.innerHTML = '<sup>$</sup>' + pricing.sub;
-    });
-    document.querySelectorAll('.price-per').forEach((el, i) => {
-      if (i === 0) el.textContent = pricing.onetimeDesc;
-      if (i === 1) el.textContent = pricing.subDesc;
-    });
-    // Update booking step 1
-    document.querySelector('#planOnetime .plan-price').innerHTML = '$' + pricing.onetime + ' <span>/ bin</span>';
-    document.querySelector('#planSubscription .plan-price').innerHTML = '$' + pricing.sub + ' <span>/ mo</span>';
-
-    const conf = document.getElementById('saveConfirm');
-    conf.style.display = 'block';
-    setTimeout(() => { conf.style.display = 'none'; }, 3000);
-  }
-
-  function renderEntries() {
-    const tbody = document.getElementById('entriesBody');
-    if (bookingEntries.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" class="no-entries">No booking requests yet. They'll appear here as customers submit the form.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = bookingEntries.map((e, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${e.name}</strong></td>
-        <td>${e.phone}</td>
-        <td>${e.email}</td>
-        <td>${e.address}</td>
-        <td><span class="entry-plan ${e.plan === 'subscription' ? 'plan-sub' : 'plan-one'}">${e.plan === 'subscription' ? 'Subscription' : 'One-Time'}</span></td>
-        <td>${e.freq || '—'}</td>
-        <td>${e.date || 'Flexible'}</td>
-        <td>${e.notes || '—'}</td>
-        <td style="white-space:nowrap;color:var(--gray)">${e.submitted}</td>
-      </tr>
-    `).join('');
-  }
-
-  function updateStats() {
-    const subs = bookingEntries.filter(e => e.plan === 'subscription').length;
-    const ones = bookingEntries.filter(e => e.plan === 'onetime').length;
-    document.getElementById('statTotal').textContent = bookingEntries.length;
-    document.getElementById('statSubs').textContent = subs;
-    document.getElementById('statOnetime').textContent = ones;
-    document.getElementById('statRevenue').textContent = '$' + (subs * pricing.sub).toFixed(0);
-  }
-
-  function exportCSV() {
-    if (bookingEntries.length === 0) { alert('No entries to export yet.'); return; }
-    const headers = ['#','Name','Phone','Email','Address','Plan','Frequency','Date','Notes','Submitted'];
-    const rows = bookingEntries.map((e, i) => [
-      i+1, e.name, e.phone, e.email, e.address,
-      e.plan === 'subscription' ? 'Subscription' : 'One-Time',
-      e.freq || '', e.date || 'Flexible', e.notes || '', e.submitted
-    ].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'cleanbinshine-bookings.csv';
-    a.click();
-  }
-
-  // Override submitBooking to save to Supabase + session
-  const _origSubmit = submitBooking;
-  submitBooking = async function() {
-    const entry = {
-      name: (document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value).trim(),
-      phone: document.getElementById('fPhone').value,
-      email: document.getElementById('fEmail').value,
-      address: document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value,
-      plan: booking.plan,
-      freq: booking.freq === 'monthly' ? 'Monthly (2x/mo)' : booking.freq === 'bimonthly' ? 'Bi-Monthly' : '',
-      date: document.getElementById('fDate').value,
-      notes: document.getElementById('fNotes').value,
-      submitted: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-    };
-
-    // Save to Supabase
-    try {
-      if (!_sb) { console.warn('Supabase not in preview'); }
-      else { const { error } = await _sb.from('Bookings').insert([{
-        name: entry.name,
-        phone: entry.phone,
-        email: entry.email,
-        address: entry.address,
-        plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-        frequency: entry.freq || 'One-time',
-        preferred_date: entry.date || 'Flexible',
-        notes: entry.notes || ''
-      }]);
-      if (error) console.error('Supabase insert error:', error.message);
-      }} // close else
-    } catch(e) {
-      console.error('Supabase error:', e);
-    }
-
-    // Send email notification via Resend
-    try {
-      await fetch('/api/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: entry.name,
-          phone: entry.phone,
-          email: entry.email,
-          address: entry.address,
-          plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-          frequency: entry.freq || 'One-time',
-          preferred_date: entry.date || 'Flexible',
-          notes: entry.notes || ''
-        })
-      });
-    } catch(e) {
-      console.error('Notify error:', e);
-    }
-
-    // Create customer + appointment in Square
-    try {
-      await fetch('/api/square', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: entry.name,
-          phone: entry.phone,
-          email: entry.email,
-          address: entry.address,
-          plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-          preferred_date: entry.date || 'Flexible',
-          notes: entry.notes || ''
-        })
-      });
-    } catch(e) {
-      console.error('Square error:', e);
-    }
-
-    // Also keep in session for admin
-    bookingEntries.push(entry);
-    _origSubmit();
-  };
-
-  // Load entries from Supabase when admin opens
-  async function loadEntriesFromSupabase() {
-    if (!_sb) return;
-    try {
-      const { data, error } = await _sb
-        .from('Bookings')
-        .select('*')
-        .order('id', { ascending: false });
-      if (error) { console.error('Load error:', error.message); return; }
-      if (data && data.length > 0) {
-        bookingEntries = data.map(r => ({
-          name: r.name || '',
-          phone: r.phone || '',
-          email: r.email || '',
-          address: r.address || '',
-          plan: (r.plan || '').includes('Subscription') ? 'subscription' : 'onetime',
-          freq: r.frequency || '',
-          date: r.preferred_date || '',
-          notes: r.notes || '',
-          submitted: r.created_at ? new Date(r.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
-        }));
-      }
-    } catch(e) {
-      console.error('Load error:', e);
-    }
-  }
-
-</script>
-
-<!-- ══ ADMIN LOGIN OVERLAY ══ -->
 <div id="adminOverlay">
-  <div class="admin-login" style="position:relative">
+  <div class="admin-login">
     <button class="admin-close-btn" onclick="closeAdmin()">✕</button>
-    <h2>🔐 Admin</h2>
-    <p>Clean Bin Shine · Internal Access</p>
+    <h2>🔐 Admin</h2><p>Clean Bin Shine · Internal Access</p>
     <input type="password" id="adminPwInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdminPw()">
-    <div class="err" id="adminErr">Incorrect password. Try again.</div>
+    <div class="admin-err" id="adminErr">Incorrect password.</div>
     <button class="btn-primary" style="width:100%" onclick="checkAdminPw()">Enter</button>
   </div>
 </div>
 
-<!-- ══ ADMIN DASHBOARD ══ -->
 <div id="adminPanel">
   <div class="admin-header">
-    <div>
-      <h1>⚙️ Admin Dashboard</h1>
-      <p>CLEAN BIN SHINE · INTERNAL USE ONLY</p>
-    </div>
+    <div><h1>⚙️ Admin Dashboard</h1><p style="color:var(--gray);font-size:0.8rem">CLEAN BIN SHINE · INTERNAL</p></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
       <button class="btn-admin-logout" onclick="logoutAdmin()">Log Out</button>
     </div>
   </div>
-
-  <!-- Stats -->
   <div class="admin-stats">
-    <div class="admin-stat">
-      <div class="num" id="statTotal">0</div>
-      <div class="lbl">Total Requests</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statSubs">0</div>
-      <div class="lbl">Subscriptions</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statOnetime">0</div>
-      <div class="lbl">One-Time</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statRevenue">$0</div>
-      <div class="lbl">Est. Monthly Revenue</div>
-    </div>
+    <div class="admin-stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Requests</div></div>
+    <div class="admin-stat"><div class="num" id="statSubs">0</div><div class="lbl">Subscriptions</div></div>
+    <div class="admin-stat"><div class="num" id="statOnetime">0</div><div class="lbl">One-Time</div></div>
+    <div class="admin-stat"><div class="num" id="statRevenue">$0</div><div class="lbl">Est. Monthly Revenue</div></div>
   </div>
-
-  <!-- Pricing Editor -->
   <div class="admin-section-title">💰 Edit Pricing</div>
   <div class="pricing-editor">
     <div class="price-edit-grid">
-      <div class="price-edit-card">
-        <h4>One-Time Clean</h4>
-        <label>Price per bin ($)</label>
-        <input type="number" id="editOnetimePrice" value="25" min="1">
-        <label>Description</label>
-        <input type="text" id="editOnetimeDesc" value="per bin · one-time visit">
-      </div>
-      <div class="price-edit-card">
-        <h4>Monthly Subscription</h4>
-        <label>Monthly price ($)</label>
-        <input type="number" id="editSubPrice" value="37" min="1">
-        <label>Description</label>
-        <input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month">
-      </div>
+      <div class="price-edit-card"><h4>One-Time Clean</h4><label>Price per bin ($)</label><input type="number" id="editOnetimePrice" value="25"><label>Description</label><input type="text" id="editOnetimeDesc" value="per bin · one-time visit"></div>
+      <div class="price-edit-card"><h4>Monthly Subscription</h4><label>Monthly price ($)</label><input type="number" id="editSubPrice" value="37"><label>Description</label><input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month"></div>
     </div>
     <button class="btn-save-pricing" onclick="savePricing()">Save & Update Site Pricing</button>
-    <div class="save-confirm" id="saveConfirm">✅ Pricing updated on the live site!</div>
+    <div class="save-confirm" id="saveConfirm">✅ Pricing updated!</div>
   </div>
-
-  <!-- Booking Entries -->
   <div class="admin-section-title">📋 Booking Requests</div>
   <div class="entries-wrap">
     <table class="entries-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Email</th>
-          <th>Address</th>
-          <th>Plan</th>
-          <th>Frequency</th>
-          <th>Date</th>
-          <th>Notes</th>
-          <th>Submitted</th>
-        </tr>
-      </thead>
-      <tbody id="entriesBody">
-        <tr><td colspan="10" class="no-entries">No booking requests yet. They'll appear here as customers submit the form.</td></tr>
-      </tbody>
+      <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Address</th><th>Plan</th><th>Date</th><th>Notes</th><th>Submitted</th></tr></thead>
+      <tbody id="entriesBody"><tr><td colspan="9" class="no-entries">No bookings yet.</td></tr></tbody>
     </table>
   </div>
 </div>
 
-</body>
-</html>
-  }); // end window.addEventListener load
-</script>
-</body>html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clean Bin Shine – We Handle the Nasty</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-<style>
-  :root {
-    --navy: #0d2248;
-    --navy-dark: #091830;
-    --navy-mid: #162f5c;
-    --gold: #e8a81e;
-    --gold-light: #f5c842;
-    --green: #4caf50;
-    --green-bright: #6dd96d;
-    --white: #f5f0e8;
-    --gray: #8fa0b8;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--navy-dark);
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ── TOP BAR ── */
-  .topbar {
-    background: var(--navy-dark);
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    padding: 10px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(8px);
-  }
-  .topbar-logo {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 3px;
-    color: var(--white);
-    text-transform: uppercase;
-  }
-  .topbar-logo span { color: var(--gold); }
-  .topbar-contact {
-    font-size: 0.9rem;
-    color: var(--gray);
-    text-align: right;
-    line-height: 1.4;
-  }
-  .topbar-contact a { color: var(--gold); text-decoration: none; font-weight: 700; }
-
-  /* ── TABS ── */
-  .tab-nav {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    padding: 16px 16px 0;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 10;
-  }
-  .tab-btn {
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 18px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-bottom: none;
-    color: var(--gray);
-    cursor: pointer;
-    border-radius: 6px 6px 0 0;
-    transition: all 0.2s;
-  }
-  .tab-btn:hover { color: var(--white); border-color: rgba(232,168,30,0.4); }
-  .tab-btn.active { background: var(--navy-mid); color: var(--gold); border-color: rgba(232,168,30,0.5); }
-  .tab-line { height: 2px; background: rgba(232,168,30,0.3); margin: 0 16px; position: relative; z-index: 10; }
-
-  /* ── TAB PANELS ── */
-  .tab-panel { display: none; animation: fadeUp 0.35s ease; }
-  .tab-panel.active { display: block; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes float {
-    0%,100% { transform: translateY(0px); }
-    50%      { transform: translateY(-14px); }
-  }
-  @keyframes sparkPulse {
-    0%,100% { opacity: 0.4; transform: scale(0.85); }
-    50%      { opacity: 1;   transform: scale(1.15); }
-  }
-  @keyframes spinSlow { to { transform: rotate(360deg); } }
-  @keyframes floatIn {
-    from { opacity: 0; transform: scale(0.85) translateY(20px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  /* ══ HERO ══ */
-  .hero {
-    background: var(--navy-mid);
-    min-height: 88vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 56px 24px 48px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    width: 700px; height: 700px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(232,168,30,0.07) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  }
-
-  /* ARCH title */
-  .hero-arch {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(2rem, 6vw, 4rem);
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    color: var(--white);
-    line-height: 1;
-    margin-bottom: 0;
-    animation: fadeUp 0.7s 0.1s ease both;
-  }
-
-  /* bin visual */
-  .hero-visual {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    margin: 8px 0;
-    animation: floatIn 0.9s 0.2s ease both;
-  }
-  .bin-wrap {
-    position: relative;
-    width: clamp(200px, 36vw, 340px);
-  }
-  .bin-wrap img {
-    width: 100%;
-    filter: drop-shadow(0 24px 48px rgba(0,0,0,0.5));
-    animation: float 4s ease-in-out infinite;
-  }
-  .sparkle { position: absolute; width: 52px; height: 52px; pointer-events: none; }
-  .sparkle svg { width: 100%; height: 100%; }
-  .sp1 { top: 0%; left: -6%; animation: sparkPulse 2.5s ease-in-out infinite; }
-  .sp2 { top: 35%; right: -8%; animation: sparkPulse 2.5s 0.8s ease-in-out infinite; }
-  .sp3 { bottom: 5%; left: 5%; animation: sparkPulse 2.5s 1.4s ease-in-out infinite; }
-  .ring {
-    position: absolute;
-    inset: -20px;
-    border: 1px solid rgba(232,168,30,0.12);
-    border-radius: 50%;
-    animation: spinSlow 22s linear infinite;
-  }
-  .ring2 { inset: -48px; border-color: rgba(232,168,30,0.05); animation-duration: 38s; animation-direction: reverse; }
-
-  /* tagline below bin */
-  .hero-tagline {
-    font-family: 'Arimo', sans-serif;
-    font-size: clamp(0.75rem, 2vw, 0.95rem);
-    font-weight: 700;
-    color: var(--green-bright);
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    margin: 4px 0 28px;
-    animation: fadeUp 0.7s 0.4s ease both;
-  }
-
-  .hero-desc {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--gray);
-    max-width: 480px;
-    margin: 0 auto 32px;
-    animation: fadeUp 0.7s 0.5s ease both;
-  }
-  .hero-cta-row {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.7s 0.6s ease both;
-  }
-  .hero-badges {
-    display: flex;
-    gap: 20px;
-    margin-top: 32px;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.7s 0.75s ease both;
-  }
-  .badge {
-    font-size: 0.78rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gray);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-
-  /* ── BUTTONS ── */
-  .btn-primary {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 15px 32px;
-    background: var(--gold);
-    color: var(--navy-dark);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,168,30,0.35); }
-  .btn-secondary {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 14px 32px;
-    background: transparent;
-    color: var(--white);
-    border: 1.5px solid rgba(255,255,255,0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* ── SHARED SECTION ── */
-  .section { max-width: 920px; margin: 0 auto; padding: 64px 24px; }
-  .section-label {
-    font-size: 0.78rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--green-bright);
-    margin-bottom: 10px;
-  }
-  .section-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    letter-spacing: 2px;
-    color: var(--white);
-    line-height: 1;
-    margin-bottom: 14px;
-  }
-  .section-title span { color: var(--gold); }
-  .section-sub { font-size: 1rem; color: var(--gray); max-width: 520px; line-height: 1.75; margin-bottom: 48px; }
-
-  /* ══ WHY IT MATTERS ══ */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-    gap: 2px;
-    background: rgba(232,168,30,0.12);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 48px;
-  }
-  .stat-block { background: var(--navy-mid); padding: 32px 18px; text-align: center; }
-  .stat-num { font-family: 'Black Han Sans', sans-serif; font-size: 2.8rem; color: var(--gold); line-height: 1; }
-  .stat-unit { font-size: 1.4rem; color: var(--gold-light); }
-  .stat-label { font-size: .73rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-top: 6px; line-height: 1.4; }
-  .reason-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
-  .reason-card { background: var(--navy-mid); border: 1px solid rgba(255,255,255,.07); border-radius: 10px; padding: 28px 24px; transition: border-color .2s, transform .2s; position: relative; overflow: hidden; }
-  .reason-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
-  .reason-card:hover::before { transform: scaleX(1); }
-  .reason-card:hover { border-color: rgba(232,168,30,.3); transform: translateY(-4px); }
-  .reason-icon { font-size: 2.2rem; margin-bottom: 14px; display: block; }
-  .reason-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.05rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--white); margin-bottom: 10px; }
-  .reason-card p { font-size: .87rem; color: var(--gray); line-height: 1.7; }
-  .stat-callout { display: inline-block; margin-top: 12px; background: rgba(232,168,30,.12); border: 1px solid rgba(232,168,30,.25); border-radius: 4px; padding: 5px 12px; font-size: .72rem; font-weight: 700; letter-spacing: 1px; color: var(--gold-light); text-transform: uppercase; }
-  .heat-banner { margin-top: 40px; background: linear-gradient(135deg, rgba(232,100,30,.12) 0%, rgba(22,47,92,.9) 100%); border: 1px solid rgba(232,120,30,.3); border-radius: 10px; padding: 36px 40px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
-  .heat-icon { font-size: 3.5rem; flex-shrink: 0; }
-  .heat-banner h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; letter-spacing: 2px; text-transform: uppercase; color: var(--white); margin-bottom: 8px; }
-  .heat-banner p { font-size: .9rem; color: var(--gray); line-height: 1.7; max-width: 540px; }
-  .heat-banner p strong { color: var(--gold-light); }
-
-  /* ══ HOW IT WORKS ══ */
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2px; background: rgba(232,168,30,0.1); border-radius: 8px; overflow: hidden; }
-  .step { background: var(--navy-mid); padding: 36px 28px; position: relative; transition: background 0.2s; }
-  .step:hover { background: #1d3a6e; }
-  .step-num { font-family: 'Black Han Sans', sans-serif; font-size: 4rem; color: rgba(232,168,30,0.15); line-height: 1; position: absolute; top: 16px; right: 20px; }
-  .step-icon { font-size: 2rem; margin-bottom: 16px; }
-  .step h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.1rem; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
-  .step p { font-size: 0.88rem; line-height: 1.6; color: var(--gray); }
-
-  /* ══ PRICING ══ */
-  .pricing-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 48px;
-    background: var(--navy-mid);
-    border-radius: 6px;
-    padding: 4px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .toggle-btn {
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 28px;
-    background: transparent;
-    border: none;
-    color: var(--gray);
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s;
-  }
-  .toggle-btn.active { background: var(--gold); color: var(--navy-dark); }
-  .pricing-panel { display: none; }
-  .pricing-panel.active { display: block; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-  .price-card { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 36px 28px; position: relative; transition: transform 0.2s, border-color 0.2s; }
-  .price-card:hover { transform: translateY(-4px); border-color: rgba(232,168,30,0.3); }
-  .price-card.featured { border-color: var(--gold); background: linear-gradient(160deg, #1d3a6e 0%, var(--navy-mid) 100%); }
-  .featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
-  .price-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.5rem; letter-spacing: 2px; color: var(--white); margin-bottom: 6px; }
-  .price-desc { font-size: 0.85rem; color: var(--gray); margin-bottom: 24px; line-height: 1.5; }
-  .price-amount { font-family: 'Black Han Sans', sans-serif; font-size: 3.2rem; color: var(--gold); line-height: 1; }
-  .price-amount sup { font-size: 1.4rem; vertical-align: top; margin-top: 8px; display: inline-block; }
-  .price-per { font-size: 0.8rem; color: var(--gray); margin-bottom: 28px; }
-  .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
-  .price-features li { font-size: 0.88rem; color: var(--gray); display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; }
-  .price-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; flex-shrink: 0; }
-  .btn-price { width: 100%; font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.92rem; letter-spacing: 2px; text-transform: uppercase; padding: 14px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border: none; }
-  .btn-price-gold { background: var(--gold); color: var(--navy-dark); }
-  .btn-price-gold:hover { background: var(--gold-light); }
-  .btn-price-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: var(--white); }
-  .btn-price-outline:hover { border-color: var(--gold); color: var(--gold); }
-  .pricing-note { text-align: center; margin-top: 32px; font-size: 0.85rem; color: var(--gray); }
-  .pricing-note strong { color: var(--green-bright); }
-
-  /* stink banner */
-  .stink-banner {
-    background: linear-gradient(135deg, rgba(232,168,30,0.12) 0%, rgba(22,47,92,0.9) 100%);
-    border-top: 1px solid rgba(232,168,30,0.2);
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    padding: 28px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    text-align: center;
-  }
-  .stink-banner p { font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--white); }
-  .stink-banner p em { color: var(--gold); font-style: normal; }
-
-  /* ══ SERVICE AREA ══ */
-  .area-hero { background: var(--navy-mid); border-radius: 10px; padding: 48px 36px; text-align: center; margin-bottom: 32px; border: 1px solid rgba(232,168,30,0.12); position: relative; overflow: hidden; }
-  .area-hero::before { content: '📍'; font-size: 8rem; position: absolute; bottom: -20px; right: -10px; opacity: 0.06; }
-  .area-hero h2 { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 3px; color: var(--white); margin-bottom: 12px; }
-  .area-hero p { color: var(--gray); font-size: 1rem; line-height: 1.6; max-width: 480px; margin: 0 auto 28px; }
-  .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .city-pill { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 600; color: var(--white); transition: border-color 0.2s; }
-  .city-pill:hover { border-color: var(--gold); }
-  .city-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-  .area-cta { background: linear-gradient(135deg, rgba(232,168,30,0.1) 0%, rgba(22,47,92,0.8) 100%); border: 1px solid rgba(232,168,30,0.25); border-radius: 10px; padding: 40px; text-align: center; margin-top: 32px; }
-  .area-cta h3 { font-family: 'Black Han Sans', sans-serif; font-size: 2rem; letter-spacing: 2px; margin-bottom: 10px; color: var(--white); }
-  .area-cta p { color: var(--gray); margin-bottom: 24px; font-size: 0.95rem; }
-
-  /* ══ BOOKING FLOW ══ */
-  .book-wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
-  .book-header { text-align: center; margin-bottom: 48px; }
-  .book-header h2 { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 3px; color: var(--white); margin-bottom: 10px; }
-  .book-header h2 span { color: var(--gold); }
-  .book-header p { color: var(--gray); font-size: 0.95rem; }
-
-  /* progress bar */
-  .progress-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 48px; }
-  .prog-step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .prog-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--navy-mid); border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-family: 'Black Han Sans', sans-serif; font-size: 0.9rem; color: var(--gray); transition: all 0.3s; }
-  .prog-dot.active { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
-  .prog-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
-  .prog-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
-  .prog-label.active { color: var(--gold); }
-  .prog-line { width: 60px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 22px; transition: background 0.3s; }
-  .prog-line.done { background: var(--green); }
-
-  /* booking step panels */
-  .book-step { display: none; animation: fadeUp 0.3s ease; }
-  .book-step.active { display: block; }
-
-  /* plan cards */
-  .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
-  @media (max-width: 520px) { .plan-grid { grid-template-columns: 1fr; } }
-  .plan-card {
-    background: var(--navy-mid);
-    border: 2px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 32px 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-  }
-  .plan-card:hover { border-color: rgba(232,168,30,0.4); transform: translateY(-3px); }
-  .plan-card.selected { border-color: var(--gold); background: linear-gradient(160deg, #1d3a6e 0%, var(--navy-mid) 100%); }
-  .plan-card .plan-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; padding: 3px 14px; border-radius: 20px; white-space: nowrap; }
-  .plan-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--white); margin-bottom: 4px; }
-  .plan-price { font-family: 'Black Han Sans', sans-serif; font-size: 2.6rem; color: var(--gold); line-height: 1; margin: 12px 0 4px; }
-  .plan-price span { font-size: 1rem; color: var(--gray); }
-  .plan-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.55; margin-bottom: 16px; }
-  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .plan-features li { font-size: 0.85rem; color: var(--gray); display: flex; gap: 8px; align-items: flex-start; }
-  .plan-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; flex-shrink: 0; }
-
-  /* frequency */
-  .freq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
-  @media (max-width: 480px) { .freq-grid { grid-template-columns: 1fr; } }
-  .freq-card { background: var(--navy-mid); border: 2px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 28px 24px; cursor: pointer; transition: all 0.2s; text-align: center; }
-  .freq-card:hover { border-color: rgba(232,168,30,0.4); }
-  .freq-card.selected { border-color: var(--gold); }
-  .freq-icon { font-size: 2.4rem; margin-bottom: 10px; }
-  .freq-card h3 { font-family: 'Black Han Sans', sans-serif; font-size: 1.2rem; letter-spacing: 2px; color: var(--white); margin-bottom: 6px; }
-  .freq-card p { font-size: 0.85rem; color: var(--gray); line-height: 1.5; }
-  .freq-savings { display: inline-block; margin-top: 10px; background: rgba(109,217,109,0.12); border: 1px solid rgba(109,217,109,0.3); border-radius: 4px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; color: var(--green-bright); text-transform: uppercase; }
-
-  /* address form */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
-  .form-group { margin-bottom: 18px; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-group label { display: block; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-bottom: 6px; }
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    padding: 12px 14px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-    outline: none;
-  }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
-  .form-group select option { background: var(--navy-dark); }
-  .form-group textarea { resize: vertical; min-height: 80px; }
-
-  /* confirm */
-  .confirm-card { background: var(--navy-mid); border: 1px solid rgba(232,168,30,0.2); border-radius: 12px; padding: 36px; margin-bottom: 24px; }
-  .confirm-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .confirm-row:last-child { border-bottom: none; }
-  .confirm-label { font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
-  .confirm-value { font-weight: 700; color: var(--white); text-align: right; max-width: 60%; }
-  .confirm-total { font-family: 'Black Han Sans', sans-serif; font-size: 1.8rem; color: var(--gold); }
-
-  /* nav buttons */
-  .book-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; gap: 16px; }
-  .btn-back { font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 13px 24px; background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: var(--gray); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
-  .btn-back:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-next { font-family: 'Arimo', sans-serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase; padding: 15px 36px; background: var(--gold); color: var(--navy-dark); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; flex: 1; max-width: 280px; }
-  .btn-next:hover { background: var(--gold-light); transform: translateY(-2px); }
-  .btn-next:disabled { background: rgba(232,168,30,0.3); cursor: not-allowed; transform: none; }
-
-  /* success */
-  .book-success { display: none; text-align: center; padding: 48px 24px; }
-  .book-success .success-icon { font-size: 4rem; margin-bottom: 16px; }
-  .book-success h3 { font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem; letter-spacing: 3px; color: var(--green-bright); margin-bottom: 10px; }
-  .book-success p { color: var(--gray); font-size: 0.95rem; line-height: 1.7; max-width: 420px; margin: 0 auto 24px; }
-
-  /* one-time note */
-  .onetime-note { background: rgba(232,168,30,0.08); border: 1px solid rgba(232,168,30,0.2); border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; font-size: 0.88rem; color: var(--gray); line-height: 1.6; }
-  .onetime-note strong { color: var(--gold-light); }
-
-  /* ── FOOTER ── */
-  footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 28px 24px; text-align: center; color: var(--gray); font-size: 0.8rem; letter-spacing: 0.5px; }
-  footer strong { color: var(--gold); }
-
-  @media (max-width: 600px) {
-    .tab-btn { padding: 8px 12px; font-size: 0.72rem; }
-    .plan-grid { grid-template-columns: 1fr; }
-  }
-
-  /* ══ ADMIN ══ */
-  #adminOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 999;
-    align-items: center;
-    justify-content: center;
-  }
-  #adminOverlay.show { display: flex; }
-
-  .admin-login {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.3);
-    border-radius: 12px;
-    padding: 48px 40px;
-    width: min(400px, 90vw);
-    text-align: center;
-  }
-  .admin-login h2 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .admin-login p { font-size: 0.85rem; color: var(--gray); margin-bottom: 28px; }
-  .admin-login input {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 4px;
-    padding: 13px 16px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 1rem;
-    outline: none;
-    margin-bottom: 14px;
-    transition: border-color 0.2s;
-  }
-  .admin-login input:focus { border-color: var(--gold); }
-  .admin-login .err { font-size: 0.82rem; color: #ff6b6b; margin-bottom: 12px; display: none; }
-  .admin-close-btn {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none;
-    border: none;
-    color: var(--gray);
-    font-size: 1.4rem;
-    cursor: pointer;
-    font-family: 'Arimo', sans-serif;
-  }
-
-  /* admin dashboard */
-  #adminPanel {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: var(--navy-dark);
-    z-index: 1000;
-    overflow-y: auto;
-    padding: 32px 24px;
-  }
-  #adminPanel.show { display: block; }
-
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(232,168,30,0.2);
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .admin-header h1 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: var(--gold);
-  }
-  .admin-header p { font-size: 0.8rem; color: var(--gray); letter-spacing: 1px; }
-
-  .admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 36px;
-  }
-  .admin-stat {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.12);
-    border-radius: 8px;
-    padding: 24px 20px;
-    text-align: center;
-  }
-  .admin-stat .num {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 2.4rem;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .admin-stat .lbl { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-top: 6px; }
-
-  .admin-section-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    color: var(--white);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-  }
-
-  /* pricing editor */
-  .pricing-editor {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.15);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 36px;
-  }
-  .price-edit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  @media (max-width: 500px) { .price-edit-grid { grid-template-columns: 1fr; } }
-  .price-edit-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: 20px;
-  }
-  .price-edit-card h4 {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 1.5px;
-    color: var(--white);
-    margin-bottom: 14px;
-  }
-  .price-edit-card label {
-    display: block;
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 5px;
-    margin-top: 12px;
-  }
-  .price-edit-card input {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    padding: 10px 12px;
-    color: var(--white);
-    font-family: 'Arimo', sans-serif;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .price-edit-card input:focus { border-color: var(--gold); }
-  .btn-save-pricing {
-    margin-top: 20px;
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 13px 32px;
-    background: var(--gold);
-    color: var(--navy-dark);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-save-pricing:hover { background: var(--gold-light); }
-  .save-confirm { display: none; color: var(--green-bright); font-size: 0.85rem; margin-top: 10px; }
-
-  /* entries table */
-  .entries-wrap {
-    background: var(--navy-mid);
-    border: 1px solid rgba(232,168,30,0.15);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 36px;
-    overflow-x: auto;
-  }
-  .entries-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-  .entries-table th {
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray);
-    padding: 10px 14px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    white-space: nowrap;
-  }
-  .entries-table td {
-    padding: 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: var(--white);
-    vertical-align: top;
-  }
-  .entries-table tr:last-child td { border-bottom: none; }
-  .entries-table tr:hover td { background: rgba(255,255,255,0.03); }
-  .entry-plan {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .plan-sub { background: rgba(232,168,30,0.15); color: var(--gold); }
-  .plan-one { background: rgba(109,217,109,0.12); color: var(--green-bright); }
-  .no-entries { text-align: center; color: var(--gray); padding: 32px; font-size: 0.9rem; }
-
-  .btn-admin-logout {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    background: transparent;
-    border: 1.5px solid rgba(255,255,255,0.2);
-    color: var(--gray);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-admin-logout:hover { border-color: #ff6b6b; color: #ff6b6b; }
-  .btn-export {
-    font-family: 'Arimo', sans-serif;
-    font-weight: 700;
-    font-size: 0.82rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    background: var(--navy-mid);
-    border: 1.5px solid rgba(232,168,30,0.3);
-    color: var(--gold);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-export:hover { border-color: var(--gold); background: rgba(232,168,30,0.08); }
-
-</style>
-</head>
-<body>
-
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-logo">Clean <span>Bin</span> Shine</div>
-  <div class="topbar-contact">
-    📞 <a href="tel:6822226518">(682) 222-6518</a><br>
-    📍 Fort Worth / Dallas, TX
-  </div>
-</div>
-
-<!-- TAB NAV -->
-<div class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('hero')">Home</button>
-  <button class="tab-btn" onclick="switchTab('why')">Why It Matters</button>
-  <button class="tab-btn" onclick="switchTab('how')">How It Works</button>
-  <button class="tab-btn" onclick="switchTab('pricing')">Pricing</button>
-  <button class="tab-btn" onclick="switchTab('area')">Service Area</button>
-  <button class="tab-btn" onclick="switchTab('book')">Book Now</button>
-</div>
-<div class="tab-line"></div>
-
-<!-- ══════════ HOME ══════════ -->
-<div id="tab-hero" class="tab-panel active">
-  <div class="hero">
-    <!-- TOP: Arch name -->
-    <div class="hero-arch">Clean <span style="color:var(--gold)">Bin</span> Shine</div>
-
-    <!-- CENTER: Bin image -->
-    <div class="hero-visual">
-      <div class="ring"></div>
-      <div class="ring ring2"></div>
-      <div class="bin-wrap">
-        <img id="binImg" src="./Clean%20bin.png" alt="Clean Bin Shine — sparkling clean bin" onerror="this.style.display='none'">
-        <div class="sparkle sp1">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 5L33 25L53 28L33 31L30 55L27 31L7 28L27 25L30 5Z" fill="white" opacity="0.9"/></svg>
-        </div>
-        <div class="sparkle sp2">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 8L32.5 26L50 28.5L32.5 31L30 52L27.5 31L10 28.5L27.5 26L30 8Z" fill="#e8a81e" opacity="0.85"/></svg>
-        </div>
-        <div class="sparkle sp3">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M30 10L32 24L46 26L32 28L30 50L28 28L14 26L28 24L30 10Z" fill="white" opacity="0.7"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- BOTTOM: Tagline + CTA -->
-    <p class="hero-tagline">We Handle the Nasty So You Don't Have To 🫧</p>
-    <p class="hero-desc">Your bins work hard — they deserve a deep clean too. We come to you, sanitize, deodorize, and leave them looking like new. Hands-off. Every time.</p>
-    <div class="hero-cta-row">
-      <button class="btn-primary" onclick="switchTab('book')">Book a Cleaning</button>
-      <a href="tel:6822226518" class="btn-secondary">Call (682) 222-6518</a>
-    </div>
-    <div class="hero-badges">
-      <div class="badge"><div class="badge-dot"></div>On-Site Service</div>
-      <div class="badge"><div class="badge-dot"></div>No Deposit Required</div>
-      <div class="badge"><div class="badge-dot"></div>Recurring Plans</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ WHY IT MATTERS ══════════ -->
-<div id="tab-why" class="tab-panel">
-  <div class="section">
-    <div class="section-label">The Real Reason</div>
-    <h2 class="section-title">More Than Just <span>the Smell</span></h2>
-    <p class="section-sub">Your trash bin is one of the dirtiest surfaces on your property. Here's why it matters more than you think.</p>
-
-    <div class="stat-row">
-      <div class="stat-block">
-        <div class="stat-num">99<span class="stat-unit">%</span></div>
-        <div class="stat-label">Bacteria Eliminated Per Clean</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">20<span class="stat-unit">min</span></div>
-        <div class="stat-label">How Fast Bacteria Doubles in Heat</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">106<span class="stat-unit">°F</span></div>
-        <div class="stat-label">Avg DFW Summer Temps</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-num">90<span class="stat-unit">%</span></div>
-        <div class="stat-label">Homeowners Never Clean Their Bins</div>
-      </div>
-    </div>
-
-    <div class="reason-grid">
-      <div class="reason-card">
-        <span class="reason-icon">🦠</span>
-        <h3>Bacteria & Pathogens</h3>
-        <p>Dirty bins breed E. coli, salmonella, and mold — especially after food waste sits in Texas heat.</p>
-        <div class="stat-callout">Up to 10M bacteria / sq inch</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🐜</span>
-        <h3>Pests & Infestations</h3>
-        <p>Residue and odor attract flies, maggots, roaches, and rodents straight to your front curb.</p>
-        <div class="stat-callout">Flies detect odor from 4 miles</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🌡️</span>
-        <h3>DFW Heat</h3>
-        <p>Triple-digit summers turn a neglected bin into a biohazard fast. Regular cleaning keeps it controlled.</p>
-        <div class="stat-callout">100°F+ accelerates growth 5x</div>
-      </div>
-      <div class="reason-card">
-        <span class="reason-icon">🏡</span>
-        <h3>Curb Appeal</h3>
-        <p>A clean bin is a small detail that says a lot about how you take care of your home and property.</p>
-        <div class="stat-callout">First impressions start at the curb</div>
-      </div>
-    </div>
-
-    <div class="heat-banner">
-      <div class="heat-icon">☀️</div>
-      <div>
-        <h3>DFW Summers Are No Joke</h3>
-        <p>When it's <strong>100°F+ outside</strong>, your bin turns into an oven. Bacteria multiplies faster, odors get worse, and pests move in quick. That's not a summer problem — that's a <strong>year-round DFW reality</strong>. Monthly service keeps it from ever getting that bad.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ HOW IT WORKS ══════════ -->
-<div id="tab-how" class="tab-panel">
-  <div class="section">
-    <div class="section-label">The Process</div>
-    <h2 class="section-title">Simple. Fast. <span>Spotless.</span></h2>
-    <p class="section-sub">We handle everything. You do nothing. That's kind of the whole point.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-icon">📅</div>
-        <h3>Book Online or Call</h3>
-        <p>Schedule a one-time clean or set up recurring service in minutes. We work around your pickup day.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-icon">🚛</div>
-        <h3>We Roll Up to You</h3>
-        <p>Our crew shows up with professional-grade equipment — no driveway hookups or hoses from you needed.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-icon">💦</div>
-        <h3>Deep Clean & Sanitize</h3>
-        <p>We pressure wash, deodorize, and sanitize inside and out. Bacteria? Gone. Smell? Gone.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-icon">✨</div>
-        <h3>Fresh Bin, Every Time</h3>
-        <p>We put your bins back exactly where we found them — sparkling clean, zero effort from you.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ PRICING ══════════ -->
-<div id="tab-pricing" class="tab-panel">
-  <div class="section">
-    <div class="section-label">Simple & Transparent</div>
-    <h2 class="section-title">Two Options. <span>That's It.</span></h2>
-    <p class="section-sub">No complicated tiers. No hidden fees. Just clean bins — pay after service, no deposit ever.</p>
-
-    <div class="pricing-grid" style="max-width:640px;margin:0 auto 32px;">
-
-      <!-- ONE-TIME -->
-      <div class="price-card">
-        <h3>One-Time Clean</h3>
-        <p class="price-desc">Try us out. One bin, full service — no strings attached.</p>
-        <div class="price-amount"><sup>$</sup>25</div>
-        <p class="price-per">per bin · one-time visit</p>
-        <ul class="price-features">
-          <li>Hot water pressure wash</li>
-          <li>Interior scrub & sanitize</li>
-          <li>Deodorizer treatment</li>
-          <li>Exterior rinse & shine</li>
-          <li>No commitment required</li>
-        </ul>
-        <button class="btn-price btn-price-outline" onclick="switchTab('book')">Book Now</button>
-      </div>
-
-      <!-- MONTHLY SUBSCRIPTION -->
-      <div class="price-card featured">
-        <div class="featured-badge">Most Popular</div>
-        <h3>Monthly Subscription</h3>
-        <p class="price-desc">Up to 3 bins, cleaned twice a month. Under $40 — cancel anytime.</p>
-        <div class="price-amount"><sup>$</sup>37</div>
-        <p class="price-per">per month · up to 3 bins · 2x/month</p>
-        <ul class="price-features">
-          <li>Up to 3 bins covered</li>
-          <li>2 cleanings per month</li>
-          <li>Full sanitize & deodorize every visit</li>
-          <li>Scheduled around your pickup day</li>
-          <li>Cancel anytime — no contracts</li>
-        </ul>
-        <button class="btn-price btn-price-gold" onclick="switchTab('book')">Subscribe — Under $40</button>
-      </div>
-
-    </div>
-
-    <p class="pricing-note">💳 Payment collected after service is complete — <strong>no deposit required.</strong> All major cards accepted.</p>
-  </div>
-
-  <!-- stink banner -->
-  <div class="stink-banner">
-    <p>Still living with that smell? <em>Yeah, we know.</em> 👃</p>
-    <button class="btn-primary" onclick="switchTab('book')">Book Your First Clean</button>
-  </div>
-</div>
-
-<!-- ══════════ SERVICE AREA ══════════ -->
-<div id="tab-area" class="tab-panel">
-  <div class="section">
-    <div class="area-hero">
-      <h2>Proudly Serving DFW</h2>
-      <p>We cover Fort Worth, Dallas, and surrounding cities across the Metroplex. Not sure if we come to you? Give us a call — we're always expanding.</p>
-      <button class="btn-primary" onclick="switchTab('book')">Check My Area</button>
-    </div>
-    <div class="section-label">Active Service Zones</div>
-    <div class="city-grid">
-      <div class="city-pill"><div class="city-dot"></div>Fort Worth</div>
-      <div class="city-pill"><div class="city-dot"></div>Dallas</div>
-      <div class="city-pill"><div class="city-dot"></div>Arlington</div>
-      <div class="city-pill"><div class="city-dot"></div>Mansfield</div>
-      <div class="city-pill"><div class="city-dot"></div>Burleson</div>
-      <div class="city-pill"><div class="city-dot"></div>Crowley</div>
-      <div class="city-pill"><div class="city-dot"></div>Kennedale</div>
-      <div class="city-pill"><div class="city-dot"></div>Grand Prairie</div>
-      <div class="city-pill"><div class="city-dot"></div>Irving</div>
-      <div class="city-pill"><div class="city-dot"></div>Euless</div>
-      <div class="city-pill"><div class="city-dot"></div>Bedford</div>
-      <div class="city-pill"><div class="city-dot"></div>Hurst</div>
-      <div class="city-pill"><div class="city-dot"></div>Haltom City</div>
-      <div class="city-pill"><div class="city-dot"></div>North Richland Hills</div>
-      <div class="city-pill"><div class="city-dot"></div>Keller</div>
-      <div class="city-pill"><div class="city-dot"></div>Saginaw</div>
-    </div>
-    <div class="area-cta">
-      <h3>Don't See Your City?</h3>
-      <p>We're growing fast. Reach out and we'll let you know — or add you to our waitlist for your area.</p>
-      <button class="btn-primary" onclick="switchTab('book')">Contact Us</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ BOOK NOW ══════════ -->
-<div id="tab-book" class="tab-panel">
-  <div class="book-wrap">
-    <div class="book-header">
-      <h2>Let's Get Your <span>Bins Clean</span></h2>
-      <p>Pick your plan, tell us where you are, and we'll handle the rest.</p>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="progress-bar">
-      <div class="prog-step">
-        <div class="prog-dot active" id="pd1">1</div>
-        <div class="prog-label active" id="pl1">Plan</div>
-      </div>
-      <div class="prog-line" id="pline1"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd2">2</div>
-        <div class="prog-label" id="pl2">Frequency</div>
-      </div>
-      <div class="prog-line" id="pline2"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd3">3</div>
-        <div class="prog-label" id="pl3">Address</div>
-      </div>
-      <div class="prog-line" id="pline3"></div>
-      <div class="prog-step">
-        <div class="prog-dot" id="pd4">4</div>
-        <div class="prog-label" id="pl4">Confirm</div>
-      </div>
-    </div>
-
-    <!-- STEP 1: PLAN -->
-    <div class="book-step active" id="step1">
-      <div class="plan-grid">
-        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')">
-          <h3>One-Time Clean</h3>
-          <div class="plan-price">$25 <span>/ bin</span></div>
-          <p class="plan-desc">One bin, full service. No commitment.</p>
-          <ul class="plan-features">
-            <li>Hot water pressure wash</li>
-            <li>Sanitized & deodorized</li>
-            <li>Pay after service</li>
-            <li>No contract</li>
-          </ul>
-        </div>
-        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')">
-          <div class="plan-badge">Under $40</div>
-          <h3>Monthly Subscription</h3>
-          <div class="plan-price">$37 <span>/ mo</span></div>
-          <p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p>
-          <ul class="plan-features">
-            <li>Up to 3 bins covered</li>
-            <li>2 cleanings per month</li>
-            <li>Sanitized & deodorized</li>
-            <li>Scheduled around pickup day</li>
-          </ul>
-        </div>
-      </div>
-      <div class="book-nav" style="justify-content:flex-end">
-        <button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Continue →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2: FREQUENCY -->
-    <div class="book-step" id="step2">
-      <div class="freq-grid">
-        <div class="freq-card" id="freqMonthly" onclick="selectFreq('monthly')">
-          <div class="freq-icon">📅</div>
-          <h3>Monthly</h3>
-          <p>Once a month, right after pickup day. Set it and forget it.</p>
-          <div class="freq-savings">Most popular</div>
-        </div>
-        <div class="freq-card" id="freqBimonthly" onclick="selectFreq('bimonthly')">
-          <div class="freq-icon">⚡</div>
-          <h3>Bi-Monthly</h3>
-          <p>Twice a month for heavy-use households or families. Always fresh.</p>
-          <div class="freq-savings">Best coverage · save more</div>
-        </div>
-      </div>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(1)">← Back</button>
-        <button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Continue →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3: ADDRESS -->
-    <div class="book-step" id="step3">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>First Name</label>
-          <input type="text" id="fFirstName" placeholder="Maria" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Last Name</label>
-          <input type="text" id="fLastName" placeholder="Gonzalez" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="fPhone" placeholder="(682) 555-0100" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="fEmail" placeholder="you@email.com" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Street Address</label>
-          <input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>City</label>
-          <input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep3()">
-        </div>
-        <div class="form-group">
-          <label>ZIP Code</label>
-          <input type="text" id="fZip" placeholder="76101" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Preferred Service Date</label>
-          <input type="date" id="fDate" oninput="checkStep3()">
-        </div>
-        <div class="form-group full">
-          <label>Notes (optional)</label>
-          <textarea id="fNotes" placeholder="Gate code, pickup day, number of bins, one-time vs subscription, anything else..."></textarea>
-        </div>
-      </div>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(2)">← Back</button>
-        <button class="btn-next" id="btn3" onclick="goStep(4)" disabled>Review Order →</button>
-      </div>
-    </div>
-
-    <!-- STEP 4: CONFIRM -->
-    <div class="book-step" id="step4">
-      <div class="confirm-card">
-        <div class="confirm-row">
-          <span class="confirm-label">Plan</span>
-          <span class="confirm-value" id="c-plan">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Frequency</span>
-          <span class="confirm-value" id="c-freq">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Name</span>
-          <span class="confirm-value" id="c-name">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Phone</span>
-          <span class="confirm-value" id="c-phone">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Email</span>
-          <span class="confirm-value" id="c-email">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Address</span>
-          <span class="confirm-value" id="c-address">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Preferred Date</span>
-          <span class="confirm-value" id="c-date">—</span>
-        </div>
-        <div class="confirm-row">
-          <span class="confirm-label">Price</span>
-          <span class="confirm-value confirm-total" id="c-price">—</span>
-        </div>
-      </div>
-      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">
-        💳 We'll reach out to confirm your appointment. Payment is collected <strong style="color:var(--gold-light)">after service is complete</strong> — no deposit required. We'll schedule around your trash pickup day.<br><br>
-        📞 <a href="tel:6822226518" style="color:var(--gold);">(682) 222-6518</a> &nbsp;·&nbsp; ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);">cleanbinshine@gmail.com</a>
-      </p>
-      <div class="book-nav">
-        <button class="btn-back" onclick="goStep(3)">← Back</button>
-        <button class="btn-next" onclick="submitBooking()" style="max-width:100%;flex:1">Send My Request ✨</button>
-      </div>
-    </div>
-
-    <!-- SUCCESS -->
-    <div class="book-success" id="bookSuccess">
-      <div class="success-icon">✅</div>
-      <h3>Request Sent!</h3>
-      <p>We'll reach out within a few hours to confirm your appointment. We schedule around your trash pickup day so the timing is always right. Talk soon!</p>
-      <button class="btn-primary" onclick="resetBooking()">Book Another</button>
-    </div>
-  </div>
-</div>
-
-<footer>
-  &copy; 2026 <strong>Clean Bin Shine</strong> · Fort Worth / Dallas, TX · (682) 222-6518 · <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);text-decoration:none">cleanbinshine@gmail.com</a><br style="margin-top:6px">
-  We Handle the Nasty So You Don't Have To 🗑️✨
-</footer>
-
 <script>
-  // ── Bin image ──
+// TABS
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  var labels = {hero:'Home',why:'Why It Matters',how:'How It Works',pricing:'Pricing',area:'Service Area',book:'Book Now'};
+  document.querySelectorAll('.tab-btn').forEach(function(b){ if(b.textContent.trim() === labels[id]) b.classList.add('active'); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-  // ── Tab switching ──
-  function switchTab(id) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    const labels = { hero:'Home', why:'Why It Matters', how:'How It Works', pricing:'Pricing', area:'Service Area', book:'Book Now' };
-    document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.trim() === labels[id]) b.classList.add('active'); });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// BOOKING
+var booking = {plan:'', freq:''};
+var bookingEntries = [];
+var pricing = {onetime:25, sub:37};
+
+function selectPlan(p) {
+  booking.plan = p;
+  document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById(p === 'onetime' ? 'planOnetime' : 'planSubscription').classList.add('selected');
+  var btn = document.getElementById('btn1');
+  btn.disabled = false;
+  if(p === 'onetime') {
+    btn.onclick = function(){ goStep(3); };
+  } else {
+    btn.onclick = function(){ goStep(2); };
   }
+}
 
-  // ── Pricing toggle ──
-  function switchPricing(type, btn) {
-    document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('pricing-' + type).classList.add('active');
-    btn.classList.add('active');
+function selectFreq(f) {
+  booking.freq = f;
+  document.querySelectorAll('.freq-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById(f === 'monthly' ? 'freqMonthly' : 'freqBimonthly').classList.add('selected');
+  document.getElementById('btn2').disabled = false;
+}
+
+function checkStep3() {
+  var fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate'];
+  var ok = fields.every(function(id){ return document.getElementById(id).value.trim() !== ''; });
+  document.getElementById('btn3').disabled = !ok;
+}
+
+function goStep(n) {
+  document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('step' + n).classList.add('active');
+  updateProgress(n);
+  if(n === 4) fillConfirm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress(n) {
+  for(var i = 1; i <= 4; i++) {
+    var dot = document.getElementById('pd' + i);
+    var lbl = document.getElementById('pl' + i);
+    dot.classList.remove('active','done');
+    lbl.classList.remove('active');
+    if(i < n){ dot.classList.add('done'); dot.textContent = '✓'; }
+    else if(i === n){ dot.classList.add('active'); dot.textContent = i; lbl.classList.add('active'); }
+    else { dot.textContent = i; }
   }
-
-  // ── Booking state ──
-  let booking = { plan: '', freq: '' };
-
-  function selectPlan(p) {
-    booking.plan = p;
-    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById(p === 'onetime' ? 'planOnetime' : 'planSubscription').classList.add('selected');
-    document.getElementById('btn1').disabled = false;
-    // skip frequency step for one-time
-    document.getElementById('btn1').onclick = p === 'onetime' ? () => goStep(3) : () => goStep(2);
+  for(var j = 1; j <= 3; j++) {
+    var line = document.getElementById('pline' + j);
+    if(line) line.classList.toggle('done', j < n);
   }
+}
 
-  function selectFreq(f) {
-    booking.freq = f;
-    document.querySelectorAll('.freq-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById(f === 'monthly' ? 'freqMonthly' : 'freqBimonthly').classList.add('selected');
-    document.getElementById('btn2').disabled = false;
+function fillConfirm() {
+  var isOne = booking.plan === 'onetime';
+  document.getElementById('c-plan').textContent = isOne ? 'One-Time Clean — $' + pricing.onetime + '/bin' : 'Monthly Subscription — $' + pricing.sub + '/mo (up to 3 bins)';
+  document.getElementById('c-freq').textContent = isOne ? 'One-time visit' : (booking.freq === 'monthly' ? 'Monthly (2x/mo)' : 'Bi-Monthly');
+  document.getElementById('c-name').textContent = document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value;
+  document.getElementById('c-phone').textContent = document.getElementById('fPhone').value;
+  document.getElementById('c-email').textContent = document.getElementById('fEmail').value;
+  document.getElementById('c-address').textContent = document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value;
+  document.getElementById('c-date').textContent = document.getElementById('fDate').value || 'Flexible';
+  document.getElementById('c-price').textContent = isOne ? '$' + pricing.onetime + ' / bin' : '$' + pricing.sub + ' / month';
+}
+
+function submitBooking() {
+  var entry = {
+    name: document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value,
+    phone: document.getElementById('fPhone').value,
+    email: document.getElementById('fEmail').value,
+    address: document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value,
+    plan: booking.plan,
+    freq: booking.freq,
+    date: document.getElementById('fDate').value,
+    notes: document.getElementById('fNotes').value,
+    submitted: new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  };
+  bookingEntries.push(entry);
+  var planLabel = entry.plan === 'subscription' ? 'Monthly Subscription $' + pricing.sub + '/mo' : 'One-Time $' + pricing.onetime + '/bin';
+  if(window._sb) {
+    window._sb.from('Bookings').insert([{name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.freq||'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''}]);
   }
+  fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.freq||'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''})}).catch(function(){});
+  fetch('/api/square',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,preferred_date:entry.date||'Flexible',notes:entry.notes||''})}).catch(function(){});
+  document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelector('.progress-bar').style.display = 'none';
+  document.getElementById('bookSuccess').style.display = 'block';
+}
 
-  function checkStep3() {
-    const fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate'];
-    const ok = fields.every(id => document.getElementById(id).value.trim() !== '');
-    document.getElementById('btn3').disabled = !ok;
+function resetBooking() {
+  booking = {plan:'',freq:''};
+  document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.querySelectorAll('.freq-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('btn2').disabled = true;
+  document.querySelector('.progress-bar').style.display = 'flex';
+  document.getElementById('bookSuccess').style.display = 'none';
+  updateProgress(1);
+  ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate','fNotes'].forEach(function(id){ document.getElementById(id).value=''; });
+}
+
+// ADMIN
+var ADMIN_PW = 'Dallas.2025!';
+var logoTaps = 0;
+var tapTimer = null;
+window._sb = null;
+
+document.getElementById('logoTap').addEventListener('click', function() {
+  logoTaps++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(function(){ logoTaps = 0; }, 2000);
+  if(logoTaps >= 5) {
+    logoTaps = 0;
+    document.getElementById('adminOverlay').classList.add('show');
+    setTimeout(function(){ document.getElementById('adminPwInput').focus(); }, 100);
   }
+});
 
-  function goStep(n) {
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step' + n).classList.add('active');
-    updateProgress(n);
-    if (n === 4) fillConfirm();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function updateProgress(n) {
-    for (let i = 1; i <= 4; i++) {
-      const dot = document.getElementById('pd' + i);
-      const lbl = document.getElementById('pl' + i);
-      dot.classList.remove('active','done');
-      lbl.classList.remove('active');
-      if (i < n) { dot.classList.add('done'); dot.textContent = '✓'; }
-      else if (i === n) { dot.classList.add('active'); dot.textContent = i; lbl.classList.add('active'); }
-      else { dot.textContent = i; }
-    }
-    for (let i = 1; i <= 3; i++) {
-      const line = document.getElementById('pline' + i);
-      if (line) line.classList.toggle('done', i < n);
-    }
-  }
-
-  function fillConfirm() {
-    const planLabel = booking.plan === 'onetime' ? 'One-Time Clean — $25/bin' : 'Monthly Subscription — $37/mo (up to 3 bins, 2x/month)';
-    const freqLabel = booking.plan === 'onetime' ? 'One-time visit' : (booking.freq === 'monthly' ? 'Monthly (2x/month)' : 'Bi-Monthly');
-    const price = booking.plan === 'onetime' ? '$25 / bin' : '$37 / month';
-    document.getElementById('c-plan').textContent = planLabel;
-    document.getElementById('c-freq').textContent = freqLabel;
-    document.getElementById('c-name').textContent = document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value;
-    document.getElementById('c-phone').textContent = document.getElementById('fPhone').value;
-    document.getElementById('c-email').textContent = document.getElementById('fEmail').value;
-    document.getElementById('c-address').textContent = document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value;
-    document.getElementById('c-date').textContent = document.getElementById('fDate').value || 'Flexible';
-    document.getElementById('c-price').textContent = price;
-  }
-
-  function submitBooking() {
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.querySelector('.progress-bar').style.display = 'none';
-    document.getElementById('bookSuccess').style.display = 'block';
-  }
-
-  function resetBooking() {
-    booking = { plan: '', freq: '' };
-    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.freq-card').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.book-step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('btn1').disabled = true;
-    document.getElementById('btn2').disabled = true;
-    document.querySelector('.progress-bar').style.display = 'flex';
-    document.getElementById('bookSuccess').style.display = 'none';
-    updateProgress(1);
-    ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip','fDate','fNotes'].forEach(id => { document.getElementById(id).value = ''; });
-  }
-
-  // ── SUPABASE (deferred until page fully loaded) ──
-  var _sb = null;
-  window.addEventListener('load', function() {
-    try { _sb = supabase.createClient('https://soixstllfmdkuijfgdxm.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvaXhzdGxsZm1ka3VpamZnZHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NzUyNTUsImV4cCI6MjA5MjE1MTI1NX0.ITMH75e-E-NeDvq2oVTEWA6RDhfXtlsgIaqcXdfYHq8'); } catch(e) { console.warn('Supabase not available in preview'); }
-
-  // ── ADMIN STATE ──
-  const ADMIN_PW = 'Dallas.2025!';
-  let logoTaps = 0;
-  let tapTimer = null;
-  let bookingEntries = [];
-  let pricing = { onetime: 25, onetimeDesc: 'per bin · one-time visit', sub: 37, subDesc: 'per month · up to 3 bins · 2x/month' };
-
-  // Secret tap on logo in topbar
-  document.querySelector('.topbar-logo').addEventListener('click', () => {
-    logoTaps++;
-    clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => { logoTaps = 0; }, 2000);
-    if (logoTaps >= 5) {
-      logoTaps = 0;
-      document.getElementById('adminOverlay').classList.add('show');
-      setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
-    }
-  });
-
-  function checkAdminPw() {
-    const pw = document.getElementById('adminPwInput').value;
-    if (pw === ADMIN_PW) {
-      document.getElementById('adminOverlay').classList.remove('show');
-      document.getElementById('adminPwInput').value = '';
-      document.getElementById('adminErr').style.display = 'none';
-      openAdminPanel();
-    } else {
-      document.getElementById('adminErr').style.display = 'block';
-      document.getElementById('adminPwInput').value = '';
-    }
-  }
-
-  function closeAdmin() {
+function checkAdminPw() {
+  if(document.getElementById('adminPwInput').value === ADMIN_PW) {
     document.getElementById('adminOverlay').classList.remove('show');
     document.getElementById('adminPwInput').value = '';
     document.getElementById('adminErr').style.display = 'none';
+    openAdminPanel();
+  } else {
+    document.getElementById('adminErr').style.display = 'block';
+    document.getElementById('adminPwInput').value = '';
   }
+}
 
-  async function openAdminPanel() {
-    document.getElementById('adminPanel').classList.add('show');
-    document.getElementById('entriesBody').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--gray)">Loading entries...</td></tr>';
-    await loadEntriesFromSupabase();
-    renderEntries();
-    updateStats();
-    // Load saved pricing into editor
-    document.getElementById('editOnetimePrice').value = pricing.onetime;
-    document.getElementById('editOnetimeDesc').value = pricing.onetimeDesc;
-    document.getElementById('editSubPrice').value = pricing.sub;
-    document.getElementById('editSubDesc').value = pricing.subDesc;
-  }
+function closeAdmin() {
+  document.getElementById('adminOverlay').classList.remove('show');
+  document.getElementById('adminPwInput').value = '';
+  document.getElementById('adminErr').style.display = 'none';
+}
 
-  function logoutAdmin() {
-    document.getElementById('adminPanel').classList.remove('show');
-  }
-
-  function savePricing() {
-    pricing.onetime = parseFloat(document.getElementById('editOnetimePrice').value) || 25;
-    pricing.onetimeDesc = document.getElementById('editOnetimeDesc').value;
-    pricing.sub = parseFloat(document.getElementById('editSubPrice').value) || 37;
-    pricing.subDesc = document.getElementById('editSubDesc').value;
-
-    // Update pricing tab display
-    document.querySelectorAll('.price-amount').forEach((el, i) => {
-      if (i === 0) el.innerHTML = '<sup>$</sup>' + pricing.onetime;
-      if (i === 1) el.innerHTML = '<sup>$</sup>' + pricing.sub;
-    });
-    document.querySelectorAll('.price-per').forEach((el, i) => {
-      if (i === 0) el.textContent = pricing.onetimeDesc;
-      if (i === 1) el.textContent = pricing.subDesc;
-    });
-    // Update booking step 1
-    document.querySelector('#planOnetime .plan-price').innerHTML = '$' + pricing.onetime + ' <span>/ bin</span>';
-    document.querySelector('#planSubscription .plan-price').innerHTML = '$' + pricing.sub + ' <span>/ mo</span>';
-
-    const conf = document.getElementById('saveConfirm');
-    conf.style.display = 'block';
-    setTimeout(() => { conf.style.display = 'none'; }, 3000);
-  }
-
-  function renderEntries() {
-    const tbody = document.getElementById('entriesBody');
-    if (bookingEntries.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" class="no-entries">No booking requests yet. They'll appear here as customers submit the form.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = bookingEntries.map((e, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${e.name}</strong></td>
-        <td>${e.phone}</td>
-        <td>${e.email}</td>
-        <td>${e.address}</td>
-        <td><span class="entry-plan ${e.plan === 'subscription' ? 'plan-sub' : 'plan-one'}">${e.plan === 'subscription' ? 'Subscription' : 'One-Time'}</span></td>
-        <td>${e.freq || '—'}</td>
-        <td>${e.date || 'Flexible'}</td>
-        <td>${e.notes || '—'}</td>
-        <td style="white-space:nowrap;color:var(--gray)">${e.submitted}</td>
-      </tr>
-    `).join('');
-  }
-
-  function updateStats() {
-    const subs = bookingEntries.filter(e => e.plan === 'subscription').length;
-    const ones = bookingEntries.filter(e => e.plan === 'onetime').length;
-    document.getElementById('statTotal').textContent = bookingEntries.length;
-    document.getElementById('statSubs').textContent = subs;
-    document.getElementById('statOnetime').textContent = ones;
-    document.getElementById('statRevenue').textContent = '$' + (subs * pricing.sub).toFixed(0);
-  }
-
-  function exportCSV() {
-    if (bookingEntries.length === 0) { alert('No entries to export yet.'); return; }
-    const headers = ['#','Name','Phone','Email','Address','Plan','Frequency','Date','Notes','Submitted'];
-    const rows = bookingEntries.map((e, i) => [
-      i+1, e.name, e.phone, e.email, e.address,
-      e.plan === 'subscription' ? 'Subscription' : 'One-Time',
-      e.freq || '', e.date || 'Flexible', e.notes || '', e.submitted
-    ].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'cleanbinshine-bookings.csv';
-    a.click();
-  }
-
-  // Override submitBooking to save to Supabase + session
-  const _origSubmit = submitBooking;
-  submitBooking = async function() {
-    const entry = {
-      name: (document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value).trim(),
-      phone: document.getElementById('fPhone').value,
-      email: document.getElementById('fEmail').value,
-      address: document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value,
-      plan: booking.plan,
-      freq: booking.freq === 'monthly' ? 'Monthly (2x/mo)' : booking.freq === 'bimonthly' ? 'Bi-Monthly' : '',
-      date: document.getElementById('fDate').value,
-      notes: document.getElementById('fNotes').value,
-      submitted: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-    };
-
-    // Save to Supabase
-    try {
-      if (!_sb) { console.warn('Supabase not in preview'); }
-      else { const { error } = await _sb.from('Bookings').insert([{
-        name: entry.name,
-        phone: entry.phone,
-        email: entry.email,
-        address: entry.address,
-        plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-        frequency: entry.freq || 'One-time',
-        preferred_date: entry.date || 'Flexible',
-        notes: entry.notes || ''
-      }]);
-      if (error) console.error('Supabase insert error:', error.message);
-      }} // close else
-    } catch(e) {
-      console.error('Supabase error:', e);
-    }
-
-    // Send email notification via Resend
-    try {
-      await fetch('/api/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: entry.name,
-          phone: entry.phone,
-          email: entry.email,
-          address: entry.address,
-          plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-          frequency: entry.freq || 'One-time',
-          preferred_date: entry.date || 'Flexible',
-          notes: entry.notes || ''
-        })
-      });
-    } catch(e) {
-      console.error('Notify error:', e);
-    }
-
-    // Create customer + appointment in Square
-    try {
-      await fetch('/api/square', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: entry.name,
-          phone: entry.phone,
-          email: entry.email,
-          address: entry.address,
-          plan: entry.plan === 'subscription' ? 'Monthly Subscription — $37/mo' : 'One-Time Clean — $25/bin',
-          preferred_date: entry.date || 'Flexible',
-          notes: entry.notes || ''
-        })
-      });
-    } catch(e) {
-      console.error('Square error:', e);
-    }
-
-    // Also keep in session for admin
-    bookingEntries.push(entry);
-    _origSubmit();
-  };
-
-  // Load entries from Supabase when admin opens
-  async function loadEntriesFromSupabase() {
-    if (!_sb) return;
-    try {
-      const { data, error } = await _sb
-        .from('Bookings')
-        .select('*')
-        .order('id', { ascending: false });
-      if (error) { console.error('Load error:', error.message); return; }
-      if (data && data.length > 0) {
-        bookingEntries = data.map(r => ({
-          name: r.name || '',
-          phone: r.phone || '',
-          email: r.email || '',
-          address: r.address || '',
-          plan: (r.plan || '').includes('Subscription') ? 'subscription' : 'onetime',
-          freq: r.frequency || '',
-          date: r.preferred_date || '',
-          notes: r.notes || '',
-          submitted: r.created_at ? new Date(r.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
-        }));
+function openAdminPanel() {
+  document.getElementById('adminPanel').classList.add('show');
+  document.getElementById('editOnetimePrice').value = pricing.onetime;
+  document.getElementById('editSubPrice').value = pricing.sub;
+  if(window._sb) {
+    window._sb.from('Bookings').select('*').order('id',{ascending:false}).then(function(r){
+      if(r.data && r.data.length > 0) {
+        bookingEntries = r.data.map(function(row){ return {name:row.name||'',phone:row.phone||'',email:row.email||'',address:row.address||'',plan:(row.plan||'').toLowerCase().includes('sub')?'subscription':'onetime',freq:row.frequency||'',date:row.preferred_date||'',notes:row.notes||'',submitted:row.created_at?new Date(row.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}; });
       }
-    } catch(e) {
-      console.error('Load error:', e);
+      renderEntries(); updateStats();
+    });
+  } else { renderEntries(); updateStats(); }
+}
+
+function logoutAdmin() { document.getElementById('adminPanel').classList.remove('show'); }
+
+function savePricing() {
+  pricing.onetime = parseFloat(document.getElementById('editOnetimePrice').value) || 25;
+  pricing.sub = parseFloat(document.getElementById('editSubPrice').value) || 37;
+  var oDesc = document.getElementById('editOnetimeDesc').value;
+  var sDesc = document.getElementById('editSubDesc').value;
+  document.getElementById('priceOnetime').innerHTML = '<sup>$</sup>' + pricing.onetime;
+  document.getElementById('priceSub').innerHTML = '<sup>$</sup>' + pricing.sub;
+  document.getElementById('descOnetime').textContent = oDesc;
+  document.getElementById('descSub').textContent = sDesc;
+  document.getElementById('bookPriceOnetime').innerHTML = '$' + pricing.onetime + ' <span>/ bin</span>';
+  document.getElementById('bookPriceSub').innerHTML = '$' + pricing.sub + ' <span>/ mo</span>';
+  var c = document.getElementById('saveConfirm');
+  c.style.display = 'block';
+  setTimeout(function(){ c.style.display = 'none'; }, 3000);
+}
+
+function renderEntries() {
+  var tbody = document.getElementById('entriesBody');
+  if(!bookingEntries.length){ tbody.innerHTML = '<tr><td colspan="9" class="no-entries">No bookings yet.</td></tr>'; return; }
+  tbody.innerHTML = bookingEntries.map(function(e,i){ return '<tr><td>'+(i+1)+'</td><td><strong>'+e.name+'</strong></td><td>'+e.phone+'</td><td>'+e.email+'</td><td>'+e.address+'</td><td><span class="entry-plan '+(e.plan==='subscription'?'plan-sub':'plan-one')+'">'+(e.plan==='subscription'?'Sub':'One-Time')+'</span></td><td>'+(e.date||'Flexible')+'</td><td>'+(e.notes||'—')+'</td><td style="white-space:nowrap;color:var(--gray)">'+e.submitted+'</td></tr>'; }).join('');
+}
+
+function updateStats() {
+  var subs = bookingEntries.filter(function(e){ return e.plan==='subscription'; }).length;
+  document.getElementById('statTotal').textContent = bookingEntries.length;
+  document.getElementById('statSubs').textContent = subs;
+  document.getElementById('statOnetime').textContent = bookingEntries.length - subs;
+  document.getElementById('statRevenue').textContent = '$' + (subs * pricing.sub).toFixed(0);
+}
+
+function exportCSV() {
+  if(!bookingEntries.length){ alert('No entries yet.'); return; }
+  var h = ['#','Name','Phone','Email','Address','Plan','Date','Notes','Submitted'];
+  var rows = bookingEntries.map(function(e,i){ return [i+1,e.name,e.phone,e.email,e.address,e.plan==='subscription'?'Subscription':'One-Time',e.date||'Flexible',e.notes||'',e.submitted].map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(','); });
+  var blob = new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cbs-bookings.csv'; a.click();
+}
+
+// Init Supabase
+window.addEventListener('load', function() {
+  try {
+    if(typeof supabase !== 'undefined') {
+      window._sb = supabase.createClient('https://soixstllfmdkuijfgdxm.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvaXhzdGxsZm1ka3VpamZnZHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NzUyNTUsImV4cCI6MjA5MjE1MTI1NX0.ITMH75e-E-NeDvq2oVTEWA6RDhfXtlsgIaqcXdfYHq8');
     }
-  }
-
+  } catch(e) { console.warn('Supabase unavailable:', e); }
+});
 </script>
-
-<!-- ══ ADMIN LOGIN OVERLAY ══ -->
-<div id="adminOverlay">
-  <div class="admin-login" style="position:relative">
-    <button class="admin-close-btn" onclick="closeAdmin()">✕</button>
-    <h2>🔐 Admin</h2>
-    <p>Clean Bin Shine · Internal Access</p>
-    <input type="password" id="adminPwInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdminPw()">
-    <div class="err" id="adminErr">Incorrect password. Try again.</div>
-    <button class="btn-primary" style="width:100%" onclick="checkAdminPw()">Enter</button>
-  </div>
-</div>
-
-<!-- ══ ADMIN DASHBOARD ══ -->
-<div id="adminPanel">
-  <div class="admin-header">
-    <div>
-      <h1>⚙️ Admin Dashboard</h1>
-      <p>CLEAN BIN SHINE · INTERNAL USE ONLY</p>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
-      <button class="btn-admin-logout" onclick="logoutAdmin()">Log Out</button>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <div class="admin-stats">
-    <div class="admin-stat">
-      <div class="num" id="statTotal">0</div>
-      <div class="lbl">Total Requests</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statSubs">0</div>
-      <div class="lbl">Subscriptions</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statOnetime">0</div>
-      <div class="lbl">One-Time</div>
-    </div>
-    <div class="admin-stat">
-      <div class="num" id="statRevenue">$0</div>
-      <div class="lbl">Est. Monthly Revenue</div>
-    </div>
-  </div>
-
-  <!-- Pricing Editor -->
-  <div class="admin-section-title">💰 Edit Pricing</div>
-  <div class="pricing-editor">
-    <div class="price-edit-grid">
-      <div class="price-edit-card">
-        <h4>One-Time Clean</h4>
-        <label>Price per bin ($)</label>
-        <input type="number" id="editOnetimePrice" value="25" min="1">
-        <label>Description</label>
-        <input type="text" id="editOnetimeDesc" value="per bin · one-time visit">
-      </div>
-      <div class="price-edit-card">
-        <h4>Monthly Subscription</h4>
-        <label>Monthly price ($)</label>
-        <input type="number" id="editSubPrice" value="37" min="1">
-        <label>Description</label>
-        <input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month">
-      </div>
-    </div>
-    <button class="btn-save-pricing" onclick="savePricing()">Save & Update Site Pricing</button>
-    <div class="save-confirm" id="saveConfirm">✅ Pricing updated on the live site!</div>
-  </div>
-
-  <!-- Booking Entries -->
-  <div class="admin-section-title">📋 Booking Requests</div>
-  <div class="entries-wrap">
-    <table class="entries-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Email</th>
-          <th>Address</th>
-          <th>Plan</th>
-          <th>Frequency</th>
-          <th>Date</th>
-          <th>Notes</th>
-          <th>Submitted</th>
-        </tr>
-      </thead>
-      <tbody id="entriesBody">
-        <tr><td colspan="10" class="no-entries">No booking requests yet. They'll appear here as customers submit the form.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
 </body>
 </html>
