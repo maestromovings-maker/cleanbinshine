@@ -1,18 +1,34 @@
 const { Resend } = require('resend');
+const { createClient } = require('@supabase/supabase-js');
+
+const SUPABASE_URL = 'https://soixstllfmdkuijfgdxm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvaXhzdGxsZm1ka3VpamZnZHhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NzUyNTUsImV4cCI6MjA5MjE1MTI1NX0.ITMH75e-E-NeDvq2oVTEWA6RDhfXtlsgIaqcXdfYHq8';
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { name, phone, email, address, plan, frequency, preferred_date, notes } = req.body;
 
-  const {
-    name, phone, email, address,
-    plan, frequency, preferred_date, notes
-  } = req.body;
-
+  // ── Save to Supabase ──
   try {
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { error } = await sb.from('Bookings').insert([{
+      name, phone, email, address, plan,
+      frequency: frequency || 'one-time',
+      preferred_date: preferred_date || 'Flexible',
+      notes: notes || ''
+    }]);
+    if (error) console.error('Supabase error:', error.message);
+    else console.log('Supabase insert success');
+  } catch(e) {
+    console.error('Supabase exception:', e.message);
+  }
+
+  // ── Send email via Resend ──
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: 'cleanbinshine@gmail.com',
@@ -38,9 +54,10 @@ module.exports = async (req, res) => {
         </div>
       `
     });
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Resend error:', error);
-    return res.status(500).json({ error: 'Failed to send email' });
+    console.log('Email sent successfully');
+  } catch(e) {
+    console.error('Resend error:', e.message);
   }
+
+  return res.status(200).json({ success: true });
 };
