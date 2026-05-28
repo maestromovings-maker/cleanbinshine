@@ -17,6 +17,10 @@ module.exports = async (req, res) => {
 
   try {
     // ── STEP 1: Create customer ──
+    // Format phone for Square: must be +1XXXXXXXXXX
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    const formattedPhone = cleanPhone.startsWith('1') ? '+' + cleanPhone : '+1' + cleanPhone;
+
     const nameParts = (name || '').trim().split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -29,7 +33,7 @@ module.exports = async (req, res) => {
         given_name: firstName,
         family_name: lastName,
         email_address: email,
-        phone_number: phone,
+        phone_number: formattedPhone,
         note: `Plan: ${plan} | Source: cleanbinshine.com`,
         address: { address_line_1: address }
       })
