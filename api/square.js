@@ -68,6 +68,7 @@ module.exports = async (req, res) => {
     }
 
     // ── STEP 3: Create appointment ──
+    console.log('Using location ID:', SQUARE_LOCATION_ID);
     let startAt;
     if (preferred_date && preferred_date !== 'Flexible') {
       startAt = new Date(preferred_date + 'T09:00:00').toISOString();
@@ -89,6 +90,7 @@ module.exports = async (req, res) => {
           customer_id: customerId,
           customer_note: `${plan}${notes ? ' | ' + notes : ''}`,
           seller_note: `Address: ${address}`,
+          location_type: 'BUSINESS_LOCATION',
           appointment_segments: [{
             duration_minutes: 30,
             service_variation_id: serviceVariationId,
