@@ -16,8 +16,8 @@ module.exports = async (req, res) => {
   };
 
   try {
-    // ── STEP 1: Create or find customer in Square ──
-    const nameParts = name.trim().split(' ');
+    // ── STEP 1: Create customer ──
+    const nameParts = (name || '').trim().split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
 
@@ -25,25 +25,45 @@ module.exports = async (req, res) => {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        idempotency_key: `cbs-customer-${Date.now()}-${email}`,
+        idempotency_key: `cbs-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
         given_name: firstName,
         family_name: lastName,
         email_address: email,
         phone_number: phone,
-        address: { address_line_1: address },
         note: `Plan: ${plan} | Source: cleanbinshine.com`,
-        reference_id: `CBS-${Date.now()}`
+        address: { address_line_1: address }
       })
     });
 
     const customerData = await customerRes.json();
     if (customerData.errors) {
-      console.error('Square customer error:', customerData.errors);
+      console.error('Customer error:', JSON.stringify(customerData.errors));
     }
     const customerId = customerData.customer?.id;
+    console.log('Customer created:', customerId);
 
-    // ── STEP 2: Create appointment in Square ──
-    // Parse preferred date or use tomorrow as default
+    // ── STEP 2: Look up Bin Cleaning service variation ID ──
+    const catalogRes = await fetch(`${SQUARE_BASE}/catalog/list?types=ITEM`, { headers });
+    const catalogData = await catalogRes.json();
+    
+    let serviceVariationId = null;
+    if (catalogData.objects) {
+      const binService = catalogData.objects.find(obj => 
+        obj.type === 'ITEM' && 
+        obj.item_data?.name?.toLowerCase().includes('bin cleaning')
+      );
+      if (binService && binService.item_data?.variations?.[0]) {
+        serviceVariationId = binService.item_data.variations[0].id;
+        console.log('Found service variation:', serviceVariationId);
+      }
+    }
+
+    if (!serviceVariationId) {
+      console.error('Bin Cleaning service not found in catalog');
+      return res.status(200).json({ success: true, customer_id: customerId, warning: 'Service not found' });
+    }
+
+    // ── STEP 3: Create appointment ──
     let startAt;
     if (preferred_date && preferred_date !== 'Flexible') {
       startAt = new Date(preferred_date + 'T09:00:00').toISOString();
@@ -54,55 +74,37 @@ module.exports = async (req, res) => {
       startAt = tomorrow.toISOString();
     }
 
-    // End time = start + 30 minutes
-    const endAt = new Date(new Date(startAt).getTime() + 30 * 60000).toISOString();
-
-    const apptBody = {
-      idempotency_key: `cbs-appt-${Date.now()}`,
-      appointment: {
-        location_id: SQUARE_LOCATION_ID,
-        start_at: startAt,
-        end_at: endAt,
-        customer_id: customerId || undefined,
-        customer_note: `${plan}${notes ? ' | Notes: ' + notes : ''}`,
-        seller_note: `Address: ${address} | Plan: ${plan}`,
-        appointment_segments: [
-          {
-            duration_minutes: 30,
-            service_variation_version: 1,
-            team_member_id_filter: { any: [] }
-          }
-        ]
-      }
-    };
-
     const apptRes = await fetch(`${SQUARE_BASE}/bookings`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(apptBody)
+      body: JSON.stringify({
+        idempotency_key: `cbs-appt-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
+        booking: {
+          location_id: SQUARE_LOCATION_ID,
+          start_at: startAt,
+          customer_id: customerId,
+          customer_note: `${plan}${notes ? ' | ' + notes : ''}`,
+          seller_note: `Address: ${address}`,
+          appointment_segments: [{
+            duration_minutes: 30,
+            service_variation_id: serviceVariationId,
+            service_variation_version: 1
+          }]
+        }
+      })
     });
 
     const apptData = await apptRes.json();
-
     if (apptData.errors) {
-      // Appointment failed but don't block — log and continue
-      console.error('Square appointment error:', JSON.stringify(apptData.errors));
-      return res.status(200).json({
-        success: true,
-        customer_id: customerId,
-        appointment_id: null,
-        warning: 'Customer created but appointment scheduling needs manual confirmation'
-      });
+      console.error('Appointment error:', JSON.stringify(apptData.errors));
+      return res.status(200).json({ success: true, customer_id: customerId, appointment_error: apptData.errors });
     }
 
-    return res.status(200).json({
-      success: true,
-      customer_id: customerId,
-      appointment_id: apptData.booking?.id
-    });
+    console.log('Appointment created:', apptData.booking?.id);
+    return res.status(200).json({ success: true, customer_id: customerId, appointment_id: apptData.booking?.id });
 
   } catch (err) {
-    console.error('Square API error:', err);
-    return res.status(500).json({ error: 'Square integration error', detail: err.message });
+    console.error('Square error:', err.message);
+    return res.status(500).json({ error: err.message });
   }
 };
