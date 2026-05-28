@@ -92,7 +92,8 @@ module.exports = async (req, res) => {
           appointment_segments: [{
             duration_minutes: 30,
             service_variation_id: serviceVariationId,
-            service_variation_version: 1
+            service_variation_version: 1,
+            team_member_id: 'TMdp7ZBmdSzVu5XF'
           }]
         }
       })
