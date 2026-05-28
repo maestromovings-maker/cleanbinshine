@@ -305,7 +305,7 @@ footer strong{color:var(--gold);}
       <div class="price-card">
         <h3>One-Time Clean</h3>
         <p class="price-desc">Try us out. One bin, full service — no strings attached.</p>
-        <div class="price-amount" id="priceOnetime"><sup>$</sup>25</div>
+        <div class="price-amount" id="priceOnetime"><sup>$</sup>40</div>
         <p class="price-per" id="descOnetime">per bin · one-time visit</p>
         <ul class="price-features"><li>Hot water pressure wash</li><li>Interior scrub & sanitize</li><li>Deodorizer treatment</li><li>Exterior rinse & shine</li><li>No commitment required</li></ul>
         <button class="btn-price btn-price-outline" onclick="switchTab('book')">Book Now</button>
@@ -313,11 +313,11 @@ footer strong{color:var(--gold);}
       <div class="price-card featured">
         <div class="featured-badge">Most Popular</div>
         <h3>Monthly Subscription</h3>
-        <p class="price-desc">Up to 3 bins, twice a month. Under $40 — cancel anytime.</p>
-        <div class="price-amount" id="priceSub"><sup>$</sup>37</div>
+        <p class="price-desc">Up to 3 bins, cleaned twice a month. Cancel anytime.</p>
+        <div class="price-amount" id="priceSub"><sup>$</sup>55</div>
         <p class="price-per" id="descSub">per month · up to 3 bins · 2x/month</p>
         <ul class="price-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Full sanitize & deodorize every visit</li><li>Scheduled around your pickup day</li><li>Cancel anytime — no contracts</li></ul>
-        <button class="btn-price btn-price-gold" onclick="switchTab('book')">Subscribe — Under $40</button>
+        <button class="btn-price btn-price-gold" onclick="switchTab('book')">Subscribe — $55/mo</button>
       </div>
     </div>
     <p class="pricing-note">💳 Payment collected after service is complete — <strong>no deposit required.</strong> All major cards accepted.</p>
@@ -353,8 +353,8 @@ footer strong{color:var(--gold);}
     </div>
     <div class="book-step active" id="step1">
       <div class="plan-grid">
-        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')"><h3>One-Time Clean</h3><div class="plan-price" id="bookPriceOnetime">$25 <span>/ bin</span></div><p class="plan-desc">One bin, full service. No commitment.</p><ul class="plan-features"><li>Hot water pressure wash</li><li>Sanitized &amp; deodorized</li><li>Pay after service</li><li>No contract</li></ul></div>
-        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')"><div class="plan-badge">Under $40</div><h3>Monthly Subscription</h3><div class="plan-price" id="bookPriceSub">$37 <span>/ mo</span></div><p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p><ul class="plan-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Sanitized &amp; deodorized</li><li>Scheduled around pickup day</li></ul></div>
+        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')"><h3>One-Time Clean</h3><div class="plan-price" id="bookPriceOnetime">$40 <span>/ bin</span></div><p class="plan-desc">One bin, full service. No commitment.</p><ul class="plan-features"><li>Hot water pressure wash</li><li>Sanitized &amp; deodorized</li><li>Pay after service</li><li>No contract</li></ul></div>
+        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')"><div class="plan-badge">Under $40</div><h3>Monthly Subscription</h3><div class="plan-price" id="bookPriceSub">$55 <span>/ mo</span></div><p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p><ul class="plan-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Sanitized &amp; deodorized</li><li>Scheduled around pickup day</li></ul></div>
       </div>
       <div class="book-nav" style="justify-content:flex-end"><button class="btn-next" id="btn1" disabled>Continue →</button></div>
     </div>
@@ -431,8 +431,8 @@ footer strong{color:var(--gold);}
   <div class="admin-section-title">💰 Edit Pricing</div>
   <div class="pricing-editor">
     <div class="price-edit-grid">
-      <div class="price-edit-card"><h4>One-Time Clean</h4><label>Price per bin ($)</label><input type="number" id="editOnetimePrice" value="25"><label>Description</label><input type="text" id="editOnetimeDesc" value="per bin · one-time visit"></div>
-      <div class="price-edit-card"><h4>Monthly Subscription</h4><label>Monthly price ($)</label><input type="number" id="editSubPrice" value="37"><label>Description</label><input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month"></div>
+      <div class="price-edit-card"><h4>One-Time Clean</h4><label>Price per bin ($)</label><input type="number" id="editOnetimePrice" value="40"><label>Description</label><input type="text" id="editOnetimeDesc" value="per bin · one-time visit"></div>
+      <div class="price-edit-card"><h4>Monthly Subscription</h4><label>Monthly price ($)</label><input type="number" id="editSubPrice" value="55"><label>Description</label><input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month"></div>
     </div>
     <button class="btn-save-pricing" onclick="savePricing()">Save & Update Site Pricing</button>
     <div class="save-confirm" id="saveConfirm">✅ Pricing updated!</div>
@@ -460,7 +460,7 @@ function switchTab(id) {
 // BOOKING
 var booking = {plan:'', freq:''};
 var bookingEntries = [];
-var pricing = {onetime:25, sub:37};
+var pricing = {onetime:40, sub:55};
 
 function selectPlan(p) {
   booking.plan = p;
