@@ -20,7 +20,37 @@ module.exports = async (req, res) => {
     const locData = await locRes.json();
     const location = locData.locations?.find(l => l.name === 'Clean Bin Shine') || locData.locations?.[0];
     const locationId = location?.id;
-    console.log('Location:', locationId, location?.name);
+    console.log('Location:', locationId);
+
+    // ── Get team member services to find correct variation ID ──
+    const tmRes = await fetch(`${SQUARE_BASE}/bookings/team-member-booking-profiles?limit=10`, { headers });
+    const tmData = await tmRes.json();
+    console.log('Team member profiles:', JSON.stringify(tmData).substr(0, 500));
+
+    // ── Get catalog with APPOINTMENTS type ──
+    const catRes = await fetch(`${SQUARE_BASE}/catalog/search`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        object_types: ['ITEM'],
+        query: { prefix_query: { attribute_name: 'name', attribute_prefix: 'bin' } }
+      })
+    });
+    const catData = await catRes.json();
+    console.log('Catalog search:', JSON.stringify(catData).substr(0, 500));
+
+    let serviceVariationId = null;
+    let serviceVariationVersion = null;
+
+    if (catData.objects?.length > 0) {
+      const item = catData.objects[0];
+      const variation = item.item_data?.variations?.[0];
+      if (variation) {
+        serviceVariationId = variation.id;
+        serviceVariationVersion = variation.version;
+        console.log('Service variation ID:', serviceVariationId, 'version:', serviceVariationVersion);
+      }
+    }
 
     // ── Create customer ──
     const nameParts = (name || '').trim().split(' ');
@@ -44,7 +74,12 @@ module.exports = async (req, res) => {
     const customerId = customerData.customer?.id;
     console.log('Customer:', customerId);
 
-    // ── Create appointment WITHOUT service_variation_id ──
+    if (!serviceVariationId) {
+      console.log('No service found - creating customer only');
+      return res.status(200).json({ success: true, customer_id: customerId, warning: 'No service variation found' });
+    }
+
+    // ── Create appointment ──
     let startAt;
     if (preferred_date && preferred_date !== 'Flexible') {
       startAt = new Date(preferred_date + 'T09:00:00').toISOString();
@@ -69,6 +104,8 @@ module.exports = async (req, res) => {
           location_type: 'BUSINESS_LOCATION',
           appointment_segments: [{
             duration_minutes: 30,
+            service_variation_id: serviceVariationId,
+            service_variation_version: serviceVariationVersion,
             team_member_id: 'TMdp7ZBmdSzVu5XF'
           }]
         }
