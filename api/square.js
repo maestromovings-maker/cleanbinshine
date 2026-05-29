@@ -15,23 +15,15 @@ module.exports = async (req, res) => {
   };
 
   try {
-    // ── STEP 1: Get location ID from Square directly ──
+    // ── Get location ──
     const locRes = await fetch(`${SQUARE_BASE}/locations`, { headers });
     const locData = await locRes.json();
     const location = locData.locations?.find(l => l.name === 'Clean Bin Shine') || locData.locations?.[0];
     const locationId = location?.id;
-    console.log('Locations:', JSON.stringify(locData.locations?.map(l => ({id:l.id, name:l.name}))));
-    console.log('Using location:', locationId);
+    console.log('Location:', locationId, location?.name);
 
-    if (!locationId) {
-      console.error('No location found');
-      return res.status(200).json({ success: true, warning: 'No location found' });
-    }
-
-    // ── STEP 2: Create customer ──
+    // ── Create customer ──
     const nameParts = (name || '').trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
     const cleanPhone = (phone || '').replace(/\D/g, '');
     const formattedPhone = cleanPhone.startsWith('1') ? '+' + cleanPhone : '+1' + cleanPhone;
 
@@ -40,8 +32,8 @@ module.exports = async (req, res) => {
       headers,
       body: JSON.stringify({
         idempotency_key: `cbs-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
-        given_name: firstName,
-        family_name: lastName,
+        given_name: nameParts[0] || '',
+        family_name: nameParts.slice(1).join(' ') || '',
         email_address: email,
         phone_number: formattedPhone,
         note: `Plan: ${plan} | Source: cleanbinshine.com`,
@@ -49,29 +41,10 @@ module.exports = async (req, res) => {
       })
     });
     const customerData = await customerRes.json();
-    if (customerData.errors) console.error('Customer error:', JSON.stringify(customerData.errors));
     const customerId = customerData.customer?.id;
     console.log('Customer:', customerId);
 
-    // ── STEP 3: Get service variation ID ──
-    const catalogRes = await fetch(`${SQUARE_BASE}/catalog/list?types=ITEM`, { headers });
-    const catalogData = await catalogRes.json();
-    let serviceVariationId = null;
-    if (catalogData.objects) {
-      const binService = catalogData.objects.find(obj =>
-        obj.type === 'ITEM' && obj.item_data?.name?.toLowerCase().includes('bin cleaning')
-      );
-      if (binService?.item_data?.variations?.[0]) {
-        serviceVariationId = binService.item_data.variations[0].id;
-      }
-    }
-    console.log('Service variation:', serviceVariationId);
-
-    if (!serviceVariationId) {
-      return res.status(200).json({ success: true, customer_id: customerId, warning: 'Service not found' });
-    }
-
-    // ── STEP 4: Create appointment ──
+    // ── Create appointment WITHOUT service_variation_id ──
     let startAt;
     if (preferred_date && preferred_date !== 'Flexible') {
       startAt = new Date(preferred_date + 'T09:00:00').toISOString();
@@ -96,8 +69,6 @@ module.exports = async (req, res) => {
           location_type: 'BUSINESS_LOCATION',
           appointment_segments: [{
             duration_minutes: 30,
-            service_variation_id: serviceVariationId,
-            service_variation_version: 1,
             team_member_id: 'TMdp7ZBmdSzVu5XF'
           }]
         }
