@@ -1,5 +1,4 @@
 const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
-const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
 const SQUARE_BASE = 'https://connect.squareup.com/v2';
 
 module.exports = async (req, res) => {
@@ -16,14 +15,25 @@ module.exports = async (req, res) => {
   };
 
   try {
-    // ── STEP 1: Create customer ──
-    // Format phone for Square: must be +1XXXXXXXXXX
-    const cleanPhone = (phone || '').replace(/\D/g, '');
-    const formattedPhone = cleanPhone.startsWith('1') ? '+' + cleanPhone : '+1' + cleanPhone;
+    // ── STEP 1: Get location ID from Square directly ──
+    const locRes = await fetch(`${SQUARE_BASE}/locations`, { headers });
+    const locData = await locRes.json();
+    const location = locData.locations?.find(l => l.name === 'Clean Bin Shine') || locData.locations?.[0];
+    const locationId = location?.id;
+    console.log('Locations:', JSON.stringify(locData.locations?.map(l => ({id:l.id, name:l.name}))));
+    console.log('Using location:', locationId);
 
+    if (!locationId) {
+      console.error('No location found');
+      return res.status(200).json({ success: true, warning: 'No location found' });
+    }
+
+    // ── STEP 2: Create customer ──
     const nameParts = (name || '').trim().split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    const formattedPhone = cleanPhone.startsWith('1') ? '+' + cleanPhone : '+1' + cleanPhone;
 
     const customerRes = await fetch(`${SQUARE_BASE}/customers`, {
       method: 'POST',
@@ -38,37 +48,30 @@ module.exports = async (req, res) => {
         address: { address_line_1: address }
       })
     });
-
     const customerData = await customerRes.json();
-    if (customerData.errors) {
-      console.error('Customer error:', JSON.stringify(customerData.errors));
-    }
+    if (customerData.errors) console.error('Customer error:', JSON.stringify(customerData.errors));
     const customerId = customerData.customer?.id;
-    console.log('Customer created:', customerId);
+    console.log('Customer:', customerId);
 
-    // ── STEP 2: Look up Bin Cleaning service variation ID ──
+    // ── STEP 3: Get service variation ID ──
     const catalogRes = await fetch(`${SQUARE_BASE}/catalog/list?types=ITEM`, { headers });
     const catalogData = await catalogRes.json();
-    
     let serviceVariationId = null;
     if (catalogData.objects) {
-      const binService = catalogData.objects.find(obj => 
-        obj.type === 'ITEM' && 
-        obj.item_data?.name?.toLowerCase().includes('bin cleaning')
+      const binService = catalogData.objects.find(obj =>
+        obj.type === 'ITEM' && obj.item_data?.name?.toLowerCase().includes('bin cleaning')
       );
-      if (binService && binService.item_data?.variations?.[0]) {
+      if (binService?.item_data?.variations?.[0]) {
         serviceVariationId = binService.item_data.variations[0].id;
-        console.log('Found service variation:', serviceVariationId);
       }
     }
+    console.log('Service variation:', serviceVariationId);
 
     if (!serviceVariationId) {
-      console.error('Bin Cleaning service not found in catalog');
       return res.status(200).json({ success: true, customer_id: customerId, warning: 'Service not found' });
     }
 
-    // ── STEP 3: Create appointment ──
-    console.log('Using location ID:', SQUARE_LOCATION_ID);
+    // ── STEP 4: Create appointment ──
     let startAt;
     if (preferred_date && preferred_date !== 'Flexible') {
       startAt = new Date(preferred_date + 'T09:00:00').toISOString();
@@ -85,7 +88,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         idempotency_key: `cbs-appt-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
         booking: {
-          location_id: SQUARE_LOCATION_ID,
+          location_id: locationId,
           start_at: startAt,
           customer_id: customerId,
           customer_note: `${plan}${notes ? ' | ' + notes : ''}`,
@@ -111,7 +114,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, customer_id: customerId, appointment_id: apptData.booking?.id });
 
   } catch (err) {
-    console.error('Square error:', err.message);
+    console.error('Error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 };
