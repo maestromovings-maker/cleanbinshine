@@ -22,33 +22,35 @@ module.exports = async (req, res) => {
     const locationId = location?.id;
     console.log('Location:', locationId);
 
-    // ── Get team member services to find correct variation ID ──
-    const tmRes = await fetch(`${SQUARE_BASE}/bookings/team-member-booking-profiles?limit=10`, { headers });
-    const tmData = await tmRes.json();
-    console.log('Team member profiles:', JSON.stringify(tmData).substr(0, 500));
-
-    // ── Get catalog with APPOINTMENTS type ──
-    const catRes = await fetch(`${SQUARE_BASE}/catalog/search`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        object_types: ['ITEM'],
-        query: { prefix_query: { attribute_name: 'name', attribute_prefix: 'bin' } }
-      })
-    });
+    // ── Search ALL catalog items to find what's available ──
+    const catRes = await fetch(`${SQUARE_BASE}/catalog/list?types=ITEM`, { headers });
     const catData = await catRes.json();
-    console.log('Catalog search:', JSON.stringify(catData).substr(0, 500));
+    
+    // Log ALL items so we can see what's there
+    if (catData.objects) {
+      catData.objects.forEach(obj => {
+        console.log('Item:', obj.item_data?.name, '| ID:', obj.id);
+        obj.item_data?.variations?.forEach(v => {
+          console.log('  Variation:', v.id, '| version:', v.version, '| name:', v.item_variation_data?.name);
+        });
+      });
+    }
 
     let serviceVariationId = null;
     let serviceVariationVersion = null;
 
     if (catData.objects?.length > 0) {
-      const item = catData.objects[0];
-      const variation = item.item_data?.variations?.[0];
+      // Try to find Bin Cleaning first, otherwise use first item
+      const binItem = catData.objects.find(o => 
+        o.item_data?.name?.toLowerCase().includes('bin') ||
+        o.item_data?.name?.toLowerCase().includes('clean')
+      ) || catData.objects[0];
+      
+      const variation = binItem?.item_data?.variations?.[0];
       if (variation) {
         serviceVariationId = variation.id;
         serviceVariationVersion = variation.version;
-        console.log('Service variation ID:', serviceVariationId, 'version:', serviceVariationVersion);
+        console.log('Using service:', binItem.item_data?.name, '| var ID:', serviceVariationId, '| version:', serviceVariationVersion);
       }
     }
 
@@ -75,8 +77,8 @@ module.exports = async (req, res) => {
     console.log('Customer:', customerId);
 
     if (!serviceVariationId) {
-      console.log('No service found - creating customer only');
-      return res.status(200).json({ success: true, customer_id: customerId, warning: 'No service variation found' });
+      console.log('No service found - skipping appointment');
+      return res.status(200).json({ success: true, customer_id: customerId, warning: 'No service found' });
     }
 
     // ── Create appointment ──
@@ -90,26 +92,30 @@ module.exports = async (req, res) => {
       startAt = tomorrow.toISOString();
     }
 
+    const apptBody = {
+      idempotency_key: `cbs-appt-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
+      booking: {
+        location_id: locationId,
+        start_at: startAt,
+        customer_id: customerId,
+        customer_note: `${plan}${notes ? ' | ' + notes : ''}`,
+        seller_note: `Address: ${address}`,
+        location_type: 'BUSINESS_LOCATION',
+        appointment_segments: [{
+          duration_minutes: 30,
+          service_variation_id: serviceVariationId,
+          service_variation_version: serviceVariationVersion,
+          team_member_id: 'TMdp7ZBmdSzVu5XF'
+        }]
+      }
+    };
+    
+    console.log('Booking body:', JSON.stringify(apptBody));
+
     const apptRes = await fetch(`${SQUARE_BASE}/bookings`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        idempotency_key: `cbs-appt-${Date.now()}-${Math.random().toString(36).substr(2,9)}`,
-        booking: {
-          location_id: locationId,
-          start_at: startAt,
-          customer_id: customerId,
-          customer_note: `${plan}${notes ? ' | ' + notes : ''}`,
-          seller_note: `Address: ${address}`,
-          location_type: 'BUSINESS_LOCATION',
-          appointment_segments: [{
-            duration_minutes: 30,
-            service_variation_id: serviceVariationId,
-            service_variation_version: serviceVariationVersion,
-            team_member_id: 'TMdp7ZBmdSzVu5XF'
-          }]
-        }
-      })
+      body: JSON.stringify(apptBody)
     });
 
     const apptData = await apptRes.json();
