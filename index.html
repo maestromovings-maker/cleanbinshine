@@ -216,13 +216,38 @@ body{background:var(--navy-dark);color:var(--white);font-family:'Arimo',sans-ser
 footer{border-top:1px solid rgba(255,255,255,0.06);padding:28px 24px;text-align:center;color:var(--gray);font-size:0.8rem;}
 footer strong{color:var(--gold);}
 @media(max-width:600px){.tab-btn{padding:8px 12px;font-size:0.72rem;}}
+
+  /* ── PHOTO CAROUSEL (hidden until photos added) ── */
+  .carousel-wrap { display:none; width:100%; margin:20px 0; position:relative; overflow:hidden; border-radius:10px; }
+  .carousel-wrap.active { display:block; }
+  .carousel-track { display:flex; transition:transform 0.5s ease; }
+  .carousel-slide { min-width:100%; position:relative; }
+  .carousel-slide img { width:100%; height:280px; object-fit:cover; border-radius:10px; }
+  .carousel-slide .slide-label { position:absolute; bottom:10px; left:12px; background:rgba(0,0,0,0.6); color:var(--white); font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; padding:4px 10px; border-radius:4px; }
+  .carousel-dots { display:flex; justify-content:center; gap:6px; margin-top:10px; }
+  .carousel-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); cursor:pointer; transition:background 0.2s; }
+  .carousel-dot.active { background:var(--gold); }
+  .carousel-prev, .carousel-next { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; padding:8px 14px; cursor:pointer; border-radius:4px; font-size:1.2rem; z-index:5; }
+  .carousel-prev { left:8px; }
+  .carousel-next { right:8px; }
+
+  /* before/after strip */
+  .ba-strip { display:none; gap:12px; margin:24px 0; }
+  .ba-strip.active { display:flex; flex-wrap:wrap; }
+  .ba-pair { flex:1; min-width:140px; border-radius:8px; overflow:hidden; position:relative; background:var(--navy-mid); }
+  .ba-pair img { width:100%; height:160px; object-fit:cover; }
+  .ba-pair .ba-label { position:absolute; top:8px; left:8px; font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:3px 8px; border-radius:4px; }
+  .ba-label.before { background:#e85555; color:white; }
+  .ba-label.after { background:var(--green); color:white; }
+  .ba-placeholder { width:100%; height:160px; display:flex; align-items:center; justify-content:center; color:var(--gray); font-size:0.8rem; letter-spacing:1px; }
+
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-logo" id="logoTap">Clean <span>Bin</span> Shine</div>
-  <div class="topbar-contact">📞 <a href="tel:6822226518">(682) 222-6518</a><br>📍 Fort Worth / Dallas, TX</div>
+  <div class="topbar-contact">📞 <a href="tel:6822225050">(682) 222-5050</a><br>📍 Fort Worth / Dallas, TX</div>
 </div>
 
 <div class="tab-nav">
@@ -251,8 +276,16 @@ footer strong{color:var(--gold);}
     <p class="hero-desc">Your bins work hard — they deserve a deep clean too. We come to you, sanitize, deodorize, and leave them looking like new. Hands-off. Every time.</p>
     <div class="hero-cta-row">
       <button class="btn-primary" onclick="switchTab('book')">Book a Cleaning</button>
-      <a href="tel:6822226518" class="btn-secondary">Call (682) 222-6518</a>
+      <a href="tel:6822225050" class="btn-secondary">Call (682) 222-5050</a>
     </div>
+    <!-- PHOTO CAROUSEL — hidden until photos added via admin -->
+    <div class="carousel-wrap" id="heroCarousel" style="max-width:480px;margin:20px auto 0;">
+      <div class="carousel-track" id="heroTrack"></div>
+      <button class="carousel-prev" onclick="carouselPrev('hero')">‹</button>
+      <button class="carousel-next" onclick="carouselNext('hero')">›</button>
+      <div class="carousel-dots" id="heroDots"></div>
+    </div>
+
     <div class="hero-badges">
       <div class="badge"><div class="badge-dot"></div>On-Site Service</div>
       <div class="badge"><div class="badge-dot"></div>No Deposit Required</div>
@@ -272,6 +305,12 @@ footer strong{color:var(--gold);}
       <div class="stat-block"><div class="stat-num">106<span class="stat-unit">°F</span></div><div class="stat-label">Avg DFW Summer Temps</div></div>
       <div class="stat-block"><div class="stat-num">90<span class="stat-unit">%</span></div><div class="stat-label">Homeowners Never Clean Their Bins</div></div>
     </div>
+    <!-- BEFORE/AFTER STRIP — hidden until photos added via admin -->
+    <div class="ba-strip" id="whyBaStrip">
+      <div class="ba-pair"><div class="ba-placeholder">Before photo coming soon</div><span class="ba-label before">Before</span></div>
+      <div class="ba-pair"><div class="ba-placeholder">After photo coming soon</div><span class="ba-label after">After</span></div>
+    </div>
+
     <div class="reason-grid">
       <div class="reason-card"><span class="reason-icon">🦠</span><h3>Bacteria & Pathogens</h3><p>Dirty bins breed E. coli, salmonella, and mold — especially after food waste sits in Texas heat.</p><div class="stat-callout">Up to 10M bacteria / sq inch</div></div>
       <div class="reason-card"><span class="reason-icon">🐜</span><h3>Pests & Infestations</h3><p>Residue and odor attract flies, maggots, roaches, and rodents straight to your front curb.</p><div class="stat-callout">Flies detect odor from 4 miles</div></div>
@@ -287,6 +326,13 @@ footer strong{color:var(--gold);}
     <div class="section-label">The Process</div>
     <h2 class="section-title">Simple. Fast. <span>Spotless.</span></h2>
     <p class="section-sub">We handle everything. You do nothing. That's kind of the whole point.</p>
+    <!-- PROCESS PHOTOS — hidden until added via admin -->
+    <div class="ba-strip" id="howPhotoStrip">
+      <div class="ba-pair"><div class="ba-placeholder">Step photo 1</div></div>
+      <div class="ba-pair"><div class="ba-placeholder">Step photo 2</div></div>
+      <div class="ba-pair"><div class="ba-placeholder">Step photo 3</div></div>
+    </div>
+
     <div class="steps">
       <div class="step"><div class="step-num">01</div><div class="step-icon">📅</div><h3>Book Online or Call</h3><p>Schedule a one-time clean or set up recurring service in minutes. We work around your pickup day.</p></div>
       <div class="step"><div class="step-num">02</div><div class="step-icon">🚛</div><h3>We Roll Up to You</h3><p>Our crew shows up with professional-grade equipment — no driveway hookups needed.</p></div>
@@ -341,6 +387,12 @@ footer strong{color:var(--gold);}
 
 <div id="tab-book" class="tab-panel">
   <div class="book-wrap">
+    <!-- BOOKING PAGE PHOTOS — hidden until added via admin -->
+    <div class="ba-strip" id="bookBaStrip" style="margin-bottom:0;">
+      <div class="ba-pair"><div class="ba-placeholder">Before</div><span class="ba-label before">Before</span></div>
+      <div class="ba-pair"><div class="ba-placeholder">After</div><span class="ba-label after">After</span></div>
+    </div>
+
     <div class="book-header"><h2>Let's Get Your <span>Bins Clean</span></h2><p>Pick your plan, tell us where you are, and we'll handle the rest.</p></div>
     <div class="progress-bar">
       <div class="prog-step"><div class="prog-dot active" id="pd1">1</div><div class="prog-label active" id="pl1">Plan</div></div>
@@ -390,7 +442,7 @@ footer strong{color:var(--gold);}
         <div class="confirm-row"><span class="confirm-label">Date</span><span class="confirm-value" id="c-date">—</span></div>
         <div class="confirm-row"><span class="confirm-label">Price</span><span class="confirm-value confirm-total" id="c-price">—</span></div>
       </div>
-      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">💳 Payment collected <strong style="color:var(--gold-light)">after service</strong> — no deposit required.<br>📞 <a href="tel:6822226518" style="color:var(--gold)">(682) 222-6518</a> · ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold)">cleanbinshine@gmail.com</a></p>
+      <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">💳 Payment collected <strong style="color:var(--gold-light)">after service</strong> — no deposit required.<br>📞 <a href="tel:6822225050" style="color:var(--gold)">(682) 222-5050</a> · ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold)">cleanbinshine@gmail.com</a></p>
       <div class="book-nav"><button class="btn-back" onclick="goStep(3)">← Back</button><button class="btn-next" style="max-width:100%;flex:1" onclick="submitBooking()">Send My Request ✨</button></div>
     </div>
     <div class="book-success" id="bookSuccess">
@@ -402,7 +454,7 @@ footer strong{color:var(--gold);}
   </div>
 </div>
 
-<footer>&copy; 2026 <strong>Clean Bin Shine</strong> · Fort Worth / Dallas, TX · <a href="tel:6822226518" style="color:var(--gold);text-decoration:none">(682) 222-6518</a> · <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);text-decoration:none">cleanbinshine@gmail.com</a><br>We Handle the Nasty So You Don't Have To 🗑️✨</footer>
+<footer>&copy; 2026 <strong>Clean Bin Shine</strong> · Fort Worth / Dallas, TX · <a href="tel:6822225050" style="color:var(--gold);text-decoration:none">(682) 222-5050</a> · <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold);text-decoration:none">cleanbinshine@gmail.com</a><br>We Handle the Nasty So You Don't Have To 🗑️✨</footer>
 
 <div id="adminOverlay">
   <div class="admin-login">
@@ -428,6 +480,114 @@ footer strong{color:var(--gold);}
     <div class="admin-stat"><div class="num" id="statOnetime">0</div><div class="lbl">One-Time</div></div>
     <div class="admin-stat"><div class="num" id="statRevenue">$0</div><div class="lbl">Est. Monthly Revenue</div></div>
   </div>
+  <div class="admin-section-title">⚙️ Site Settings</div>
+  <div class="pricing-editor" style="margin-bottom:36px">
+    <div class="price-edit-grid">
+      <div class="price-edit-card">
+        <h4>Phone Number</h4>
+        <label>Display (e.g. (682) 222-5050)</label>
+        <input type="text" id="editPhone" value="(682) 222-5050">
+        <label>Link (digits only, e.g. 6822225050)</label>
+        <input type="text" id="editPhoneLink" value="6822225050">
+      </div>
+      <div class="price-edit-card">
+        <h4>Business Info</h4>
+        <label>Service Area Text</label>
+        <input type="text" id="editArea" value="Fort Worth / Dallas, TX">
+        <label>Email Address</label>
+        <input type="text" id="editEmail" value="cleanbinshine@gmail.com">
+        <label>Business Hours</label>
+        <input type="text" id="editHours" value="Mon–Sat · 8AM–6PM">
+        <label>Tagline</label>
+        <input type="text" id="editTagline" value="We Handle the Nasty So You Don't Have To 🫧">
+      </div>
+    </div>
+    <button class="btn-save-pricing" onclick="saveSettings()">Save & Update Site</button>
+    <div class="save-confirm" id="settingsConfirm">✅ Settings updated!</div>
+  </div>
+
+  <div class="admin-section-title">📸 Photo Manager</div>
+  <div class="pricing-editor" style="margin-bottom:36px">
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:20px;line-height:1.6">Add photo URLs (from Google Drive, Cloudinary, or any image link) and toggle each section on/off. Photos won't show on the site until you turn the section on.</p>
+    
+    <div class="price-edit-grid" style="margin-bottom:20px">
+      <div class="price-edit-card">
+        <h4>🏠 Hero Carousel</h4>
+        <label>On/Off</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <input type="checkbox" id="toggleHeroCarousel" onchange="toggleSection('heroCarousel',this.checked)" style="width:auto">
+          <span style="font-size:0.85rem;color:var(--gray)">Show on Home tab</span>
+        </div>
+        <label>Photo URL 1</label><input type="text" id="heroPhoto1" placeholder="https://...image1.jpg">
+        <label>Photo URL 2</label><input type="text" id="heroPhoto2" placeholder="https://...image2.jpg">
+        <label>Photo URL 3</label><input type="text" id="heroPhoto3" placeholder="https://...image3.jpg">
+      </div>
+      <div class="price-edit-card">
+        <h4>🦠 Why It Matters — Before/After</h4>
+        <label>On/Off</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <input type="checkbox" id="toggleWhyBa" onchange="toggleSection('whyBaStrip',this.checked)" style="width:auto">
+          <span style="font-size:0.85rem;color:var(--gray)">Show before/after strip</span>
+        </div>
+        <label>Before Photo URL</label><input type="text" id="whyBefore" placeholder="https://...before.jpg">
+        <label>After Photo URL</label><input type="text" id="whyAfter" placeholder="https://...after.jpg">
+      </div>
+    </div>
+
+    <div class="price-edit-grid" style="margin-bottom:20px">
+      <div class="price-edit-card">
+        <h4>💦 How It Works — Step Photos</h4>
+        <label>On/Off</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <input type="checkbox" id="toggleHowPhotos" onchange="toggleSection('howPhotoStrip',this.checked)" style="width:auto">
+          <span style="font-size:0.85rem;color:var(--gray)">Show process photos</span>
+        </div>
+        <label>Step 1 Photo URL</label><input type="text" id="howPhoto1" placeholder="https://...step1.jpg">
+        <label>Step 2 Photo URL</label><input type="text" id="howPhoto2" placeholder="https://...step2.jpg">
+        <label>Step 3 Photo URL</label><input type="text" id="howPhoto3" placeholder="https://...step3.jpg">
+      </div>
+      <div class="price-edit-card">
+        <h4>📅 Book Now — Before/After Strip</h4>
+        <label>On/Off</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <input type="checkbox" id="toggleBookBa" onchange="toggleSection('bookBaStrip',this.checked)" style="width:auto">
+          <span style="font-size:0.85rem;color:var(--gray)">Show above booking form</span>
+        </div>
+        <label>Before Photo URL</label><input type="text" id="bookBefore" placeholder="https://...before.jpg">
+        <label>After Photo URL</label><input type="text" id="bookAfter" placeholder="https://...after.jpg">
+      </div>
+    </div>
+
+    <button class="btn-save-pricing" onclick="savePhotos()">Save & Update Photos</button>
+    <div class="save-confirm" id="photoConfirm">✅ Photos updated!</div>
+  </div>
+
+  <div class="admin-section-title">📱 Social Media Links</div>
+  <div class="pricing-editor" style="margin-bottom:36px">
+    <div class="price-edit-grid">
+      <div class="price-edit-card">
+        <h4>Social Profiles</h4>
+        <label>Facebook URL</label>
+        <input type="text" id="editFacebook" placeholder="https://facebook.com/cleanbinshine">
+        <label>Instagram URL</label>
+        <input type="text" id="editInstagram" placeholder="https://instagram.com/cleanbinshine">
+        <label>TikTok URL</label>
+        <input type="text" id="editTiktok" placeholder="https://tiktok.com/@cleanbinshine">
+      </div>
+      <div class="price-edit-card">
+        <h4>More Platforms</h4>
+        <label>Nextdoor URL</label>
+        <input type="text" id="editNextdoor" placeholder="https://nextdoor.com/...">
+        <label>Google Business URL</label>
+        <input type="text" id="editGoogle" placeholder="https://g.page/...">
+        <label>Yelp URL</label>
+        <input type="text" id="editYelp" placeholder="https://yelp.com/...">
+      </div>
+    </div>
+    <button class="btn-save-pricing" onclick="saveSocial()">Save & Update Footer</button>
+    <div class="save-confirm" id="socialConfirm">✅ Social links updated!</div>
+  </div>
+
   <div class="admin-section-title">💰 Edit Pricing</div>
   <div class="pricing-editor">
     <div class="price-edit-grid">
