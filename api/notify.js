@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: 'cleanbinshine@gmail.com',
+      to: 'maestromovings@gmail.com',
       subject: `🗑️ New Booking — ${name}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0d2248;color:#f5f0e8;padding:32px;border-radius:12px;">
