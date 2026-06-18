@@ -157,15 +157,6 @@ body{background:var(--navy-dark);color:var(--white);font-family:'Arimo',sans-ser
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:8px;}
 .plan-features li{font-size:0.85rem;color:var(--gray);display:flex;gap:8px;}
 .plan-features li::before{content:'✓';color:var(--green-bright);font-weight:700;flex-shrink:0;}
-.freq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
-@media(max-width:480px){.freq-grid{grid-template-columns:1fr;}}
-.freq-card{background:var(--navy-mid);border:2px solid rgba(255,255,255,0.08);border-radius:10px;padding:28px 24px;cursor:pointer;transition:all 0.2s;text-align:center;}
-.freq-card:hover{border-color:rgba(232,168,30,0.4);}
-.freq-card.selected{border-color:var(--gold);}
-.freq-icon{font-size:2.4rem;margin-bottom:10px;}
-.freq-card h3{font-family:'Black Han Sans',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--white);margin-bottom:6px;}
-.freq-card p{font-size:0.85rem;color:var(--gray);line-height:1.5;}
-.freq-savings{display:inline-block;margin-top:10px;background:rgba(109,217,109,0.12);border:1px solid rgba(109,217,109,0.3);border-radius:4px;padding:3px 10px;font-size:0.72rem;font-weight:700;letter-spacing:1px;color:var(--green-bright);text-transform:uppercase;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
 .form-group{margin-bottom:18px;}
@@ -432,19 +423,19 @@ footer strong{color:var(--gold);}
     <div class="pricing-grid" style="max-width:640px;margin:0 auto 32px;">
       <div class="price-card">
         <h3>One-Time Clean</h3>
-        <p class="price-desc">Try us out. One bin, full service — no strings attached.</p>
-        <div class="price-amount" id="priceOnetime"><sup>$</sup>45</div>
-        <p class="price-per" id="descOnetime">per bin · one-time visit</p>
-        <ul class="price-features"><li>Hot water pressure wash</li><li>Interior scrub & sanitize</li><li>Deodorizer treatment</li><li>Exterior rinse & shine</li><li>No commitment required</li></ul>
+        <p class="price-desc">Full service for 2 or more bins — no strings attached.</p>
+        <div class="price-amount" id="priceOnetime"><sup>$</sup>80</div>
+        <p class="price-per" id="descOnetime">flat rate for 2+ bins · one-time visit</p>
+        <ul class="price-features"><li>Covers 2 or more bins</li><li>Hot water pressure wash</li><li>Interior scrub & sanitize</li><li>Deodorizer treatment</li><li>Exterior rinse & shine</li><li>No commitment required</li></ul>
         <button class="btn-price btn-price-outline" onclick="switchTab('book')">Book Now</button>
       </div>
       <div class="price-card featured">
         <div class="featured-badge">Most Popular</div>
         <h3>Monthly Subscription</h3>
-        <p class="price-desc">Up to 3 bins, cleaned twice a month. Cancel anytime.</p>
+        <p class="price-desc">2 or more bins, cleaned twice a month — plus one on-demand clean. Cancel anytime.</p>
         <div class="price-amount" id="priceSub"><sup>$</sup>65</div>
-        <p class="price-per" id="descSub">per month · up to 3 bins · 2x/month</p>
-        <ul class="price-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Full sanitize & deodorize every visit</li><li>Scheduled around your pickup day</li><li>Cancel anytime — no contracts</li></ul>
+        <p class="price-per" id="descSub">per month · 2+ bins · 2x/month + 1 on-demand clean</p>
+        <ul class="price-features"><li>2 or more bins covered</li><li>2 scheduled cleanings per month</li><li>+1 on-demand clean per month (doesn't roll over)</li><li>Full sanitize & deodorize every visit</li><li>Scheduled around your pickup day</li><li>Cancel anytime — no contracts</li></ul>
         <button class="btn-price btn-price-gold" onclick="switchTab('book')">Subscribe — $65/mo</button>
       </div>
     </div>
@@ -479,41 +470,32 @@ footer strong{color:var(--gold);}
     <div class="progress-bar">
       <div class="prog-step"><div class="prog-dot active" id="pd1">1</div><div class="prog-label active" id="pl1">Plan</div></div>
       <div class="prog-line" id="pline1"></div>
-      <div class="prog-step"><div class="prog-dot" id="pd2">2</div><div class="prog-label" id="pl2">Frequency</div></div>
+      <div class="prog-step"><div class="prog-dot" id="pd2">2</div><div class="prog-label" id="pl2">Address</div></div>
       <div class="prog-line" id="pline2"></div>
-      <div class="prog-step"><div class="prog-dot" id="pd3">3</div><div class="prog-label" id="pl3">Address</div></div>
-      <div class="prog-line" id="pline3"></div>
-      <div class="prog-step"><div class="prog-dot" id="pd4">4</div><div class="prog-label" id="pl4">Confirm</div></div>
+      <div class="prog-step"><div class="prog-dot" id="pd3">3</div><div class="prog-label" id="pl3">Confirm</div></div>
     </div>
     <div class="book-step active" id="step1">
       <div class="plan-grid">
-        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')"><h3>One-Time Clean</h3><div class="plan-price" id="bookPriceOnetime">$45 <span>/ bin</span></div><p class="plan-desc">One bin, full service. No commitment.</p><ul class="plan-features"><li>Hot water pressure wash</li><li>Sanitized &amp; deodorized</li><li>Pay after service</li><li>No contract</li></ul></div>
-        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')"><div class="plan-badge">Under $40</div><h3>Monthly Subscription</h3><div class="plan-price" id="bookPriceSub">$65 <span>/ mo</span></div><p class="plan-desc">Up to 3 bins, 2x/month. Cancel anytime.</p><ul class="plan-features"><li>Up to 3 bins covered</li><li>2 cleanings per month</li><li>Sanitized &amp; deodorized</li><li>Scheduled around pickup day</li></ul></div>
+        <div class="plan-card" id="planOnetime" onclick="selectPlan('onetime')"><h3>One-Time Clean</h3><div class="plan-price" id="bookPriceOnetime">$80 <span>/ 2+ bins</span></div><p class="plan-desc">2 or more bins, full service. No commitment.</p><ul class="plan-features"><li>Hot water pressure wash</li><li>Sanitized &amp; deodorized</li><li>Pay after service</li><li>No contract</li></ul></div>
+        <div class="plan-card" id="planSubscription" onclick="selectPlan('subscription')"><div class="plan-badge">From $16/bin</div><h3>Monthly Subscription</h3><div class="plan-price" id="bookPriceSub">$65 <span>/ mo</span></div><p class="plan-desc">2+ bins, 2x/month + 1 on-demand clean. Cancel anytime.</p><ul class="plan-features"><li>2 or more bins covered</li><li>2 scheduled cleanings/month</li><li>+1 on-demand clean (book within 48 hrs)</li><li>Sanitized &amp; deodorized</li><li>Scheduled around pickup day</li></ul></div>
       </div>
-      <div class="book-nav" style="justify-content:flex-end"><button class="btn-next" id="btn1" disabled>Continue →</button></div>
+      <div class="book-nav" style="justify-content:flex-end"><button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Continue →</button></div>
     </div>
     <div class="book-step" id="step2">
-      <div class="freq-grid">
-        <div class="freq-card" id="freqMonthly" onclick="selectFreq('monthly')"><div class="freq-icon">📅</div><h3>Monthly</h3><p>Once a month, right after pickup day.</p><div class="freq-savings">Most popular</div></div>
-        <div class="freq-card" id="freqBimonthly" onclick="selectFreq('bimonthly')"><div class="freq-icon">⚡</div><h3>Bi-Monthly</h3><p>Twice a month for heavy-use households.</p><div class="freq-savings">Best coverage</div></div>
-      </div>
-      <div class="book-nav"><button class="btn-back" onclick="goStep(1)">← Back</button><button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Continue →</button></div>
-    </div>
-    <div class="book-step" id="step3">
       <div class="form-grid">
-        <div class="form-group"><label>First Name</label><input type="text" id="fFirstName" placeholder="Maria" oninput="checkStep3()"></div>
-        <div class="form-group"><label>Last Name</label><input type="text" id="fLastName" placeholder="Gonzalez" oninput="checkStep3()"></div>
-        <div class="form-group"><label>Phone Number</label><input type="tel" id="fPhone" placeholder="(682) 555-0100" oninput="checkStep3()"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="fEmail" placeholder="you@email.com" oninput="checkStep3()"></div>
-        <div class="form-group full"><label>Street Address</label><input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep3()"></div>
-        <div class="form-group"><label>City</label><input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep3()"></div>
-        <div class="form-group"><label>ZIP Code</label><input type="text" id="fZip" placeholder="76101" oninput="checkStep3()"></div>
-        <div class="form-group full"><label>Preferred Service Date (optional)</label><input type="date" id="fDate" oninput="checkStep3()"></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="fFirstName" placeholder="Maria" oninput="checkStep2()"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="fLastName" placeholder="Gonzalez" oninput="checkStep2()"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="fPhone" placeholder="(682) 555-0100" oninput="checkStep2()"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="fEmail" placeholder="you@email.com" oninput="checkStep2()"></div>
+        <div class="form-group full"><label>Street Address</label><input type="text" id="fStreet" placeholder="123 Main St" oninput="checkStep2()"></div>
+        <div class="form-group"><label>City</label><input type="text" id="fCity" placeholder="Fort Worth" oninput="checkStep2()"></div>
+        <div class="form-group"><label>ZIP Code</label><input type="text" id="fZip" placeholder="76101" oninput="checkStep2()"></div>
+        <div class="form-group full"><label>Preferred Service Date (optional)</label><input type="date" id="fDate" oninput="checkStep2()"></div>
         <div class="form-group full"><label>Notes (optional)</label><textarea id="fNotes" placeholder="Gate code, pickup day, number of bins, anything else..."></textarea></div>
       </div>
-      <div class="book-nav"><button class="btn-back" onclick="goStep(2)">← Back</button><button class="btn-next" id="btn3" onclick="goStep(4)" disabled>Review Order →</button></div>
+      <div class="book-nav"><button class="btn-back" onclick="goStep(1)">← Back</button><button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Review Order →</button></div>
     </div>
-    <div class="book-step" id="step4">
+    <div class="book-step" id="step3">
       <div class="confirm-card">
         <div class="confirm-row"><span class="confirm-label">Plan</span><span class="confirm-value" id="c-plan">—</span></div>
         <div class="confirm-row"><span class="confirm-label">Frequency</span><span class="confirm-value" id="c-freq">—</span></div>
@@ -525,7 +507,7 @@ footer strong{color:var(--gold);}
         <div class="confirm-row"><span class="confirm-label">Price</span><span class="confirm-value confirm-total" id="c-price">—</span></div>
       </div>
       <p style="font-size:0.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;text-align:center;">💳 Payment collected <strong style="color:var(--gold-light)">after service</strong> — no deposit required.<br>📞 <a href="tel:6822225050" style="color:var(--gold)">(682) 222-5050</a> · ✉️ <a href="mailto:cleanbinshine@gmail.com" style="color:var(--gold)">cleanbinshine@gmail.com</a></p>
-      <div class="book-nav"><button class="btn-back" onclick="goStep(3)">← Back</button><button class="btn-next" style="max-width:100%;flex:1" onclick="submitBooking()">Send My Request ✨</button></div>
+      <div class="book-nav"><button class="btn-back" onclick="goStep(2)">← Back</button><button class="btn-next" style="max-width:100%;flex:1" onclick="submitBooking()">Send My Request ✨</button></div>
     </div>
     <div class="book-success" id="bookSuccess">
       <div class="success-icon">✅</div>
@@ -673,8 +655,8 @@ footer strong{color:var(--gold);}
   <div class="admin-section-title">💰 Edit Pricing</div>
   <div class="pricing-editor">
     <div class="price-edit-grid">
-      <div class="price-edit-card"><h4>One-Time Clean</h4><label>Price per bin ($)</label><input type="number" id="editOnetimePrice" value="45"><label>Description</label><input type="text" id="editOnetimeDesc" value="per bin · one-time visit"></div>
-      <div class="price-edit-card"><h4>Monthly Subscription</h4><label>Monthly price ($)</label><input type="number" id="editSubPrice" value="65"><label>Description</label><input type="text" id="editSubDesc" value="per month · up to 3 bins · 2x/month"></div>
+      <div class="price-edit-card"><h4>One-Time Clean</h4><label>Flat price for 2+ bins ($)</label><input type="number" id="editOnetimePrice" value="80"><label>Description</label><input type="text" id="editOnetimeDesc" value="flat rate for 2+ bins · one-time visit"></div>
+      <div class="price-edit-card"><h4>Monthly Subscription</h4><label>Monthly price ($)</label><input type="number" id="editSubPrice" value="65"><label>Description</label><input type="text" id="editSubDesc" value="per month · 2+ bins · 2x/month + 1 on-demand clean"></div>
     </div>
     <button class="btn-save-pricing" onclick="savePricing()">Save & Update Site Pricing</button>
     <div class="save-confirm" id="saveConfirm">✅ Pricing updated!</div>
@@ -700,46 +682,33 @@ function switchTab(id) {
 }
 
 // BOOKING
-var booking = {plan:'', freq:''};
+var booking = {plan:''};
 var bookingEntries = [];
-var pricing = {onetime:45, sub:65};
+var pricing = {onetime:80, sub:65};
 
 function selectPlan(p) {
   booking.plan = p;
   document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
   document.getElementById(p === 'onetime' ? 'planOnetime' : 'planSubscription').classList.add('selected');
-  var btn = document.getElementById('btn1');
-  btn.disabled = false;
-  if(p === 'onetime') {
-    btn.onclick = function(){ goStep(3); };
-  } else {
-    btn.onclick = function(){ goStep(2); };
-  }
+  document.getElementById('btn1').disabled = false;
 }
 
-function selectFreq(f) {
-  booking.freq = f;
-  document.querySelectorAll('.freq-card').forEach(function(c){ c.classList.remove('selected'); });
-  document.getElementById(f === 'monthly' ? 'freqMonthly' : 'freqBimonthly').classList.add('selected');
-  document.getElementById('btn2').disabled = false;
-}
-
-function checkStep3() {
+function checkStep2() {
   var fields = ['fFirstName','fLastName','fPhone','fEmail','fStreet','fCity','fZip'];
   var ok = fields.every(function(id){ return document.getElementById(id).value.trim() !== ''; });
-  document.getElementById('btn3').disabled = !ok;
+  document.getElementById('btn2').disabled = !ok;
 }
 
 function goStep(n) {
   document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('step' + n).classList.add('active');
   updateProgress(n);
-  if(n === 4) fillConfirm();
+  if(n === 3) fillConfirm();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function updateProgress(n) {
-  for(var i = 1; i <= 4; i++) {
+  for(var i = 1; i <= 3; i++) {
     var dot = document.getElementById('pd' + i);
     var lbl = document.getElementById('pl' + i);
     dot.classList.remove('active','done');
@@ -748,7 +717,7 @@ function updateProgress(n) {
     else if(i === n){ dot.classList.add('active'); dot.textContent = i; lbl.classList.add('active'); }
     else { dot.textContent = i; }
   }
-  for(var j = 1; j <= 3; j++) {
+  for(var j = 1; j <= 2; j++) {
     var line = document.getElementById('pline' + j);
     if(line) line.classList.toggle('done', j < n);
   }
@@ -756,14 +725,14 @@ function updateProgress(n) {
 
 function fillConfirm() {
   var isOne = booking.plan === 'onetime';
-  document.getElementById('c-plan').textContent = isOne ? 'One-Time Clean — $' + pricing.onetime + '/bin' : 'Monthly Subscription — $' + pricing.sub + '/mo (up to 3 bins)';
-  document.getElementById('c-freq').textContent = isOne ? 'One-time visit' : (booking.freq === 'monthly' ? 'Monthly (2x/mo)' : 'Bi-Monthly');
+  document.getElementById('c-plan').textContent = isOne ? 'One-Time Clean — $' + pricing.onetime + ' (2+ bins)' : 'Monthly Subscription — $' + pricing.sub + '/mo (2+ bins + 1 on-demand)';
+  document.getElementById('c-freq').textContent = isOne ? 'One-time visit' : '2x/month + 1 on-demand clean';
   document.getElementById('c-name').textContent = document.getElementById('fFirstName').value + ' ' + document.getElementById('fLastName').value;
   document.getElementById('c-phone').textContent = document.getElementById('fPhone').value;
   document.getElementById('c-email').textContent = document.getElementById('fEmail').value;
   document.getElementById('c-address').textContent = document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value;
   document.getElementById('c-date').textContent = document.getElementById('fDate').value || 'Flexible';
-  document.getElementById('c-price').textContent = isOne ? '$' + pricing.onetime + ' / bin' : '$' + pricing.sub + ' / month';
+  document.getElementById('c-price').textContent = isOne ? '$' + pricing.onetime + ' (2+ bins)' : '$' + pricing.sub + ' / month';
 }
 
 function submitBooking() {
@@ -773,17 +742,16 @@ function submitBooking() {
     email: document.getElementById('fEmail').value,
     address: document.getElementById('fStreet').value + ', ' + document.getElementById('fCity').value + ' TX ' + document.getElementById('fZip').value,
     plan: booking.plan,
-    freq: booking.freq,
     date: document.getElementById('fDate').value,
     notes: document.getElementById('fNotes').value,
     submitted: new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
   };
   bookingEntries.push(entry);
-  var planLabel = entry.plan === 'subscription' ? 'Monthly Subscription $' + pricing.sub + '/mo' : 'One-Time $' + pricing.onetime + '/bin';
+  var planLabel = entry.plan === 'subscription' ? 'Monthly Subscription $' + pricing.sub + '/mo' : 'One-Time $' + pricing.onetime + ' (2+ bins)';
   if(window._sb) {
-    window._sb.from('Bookings').insert([{name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.freq||'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''}]);
+    window._sb.from('Bookings').insert([{name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.plan==='subscription'?'2x/month + 1 on-demand':'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''}]);
   }
-  fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.freq||'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''})}).catch(function(){});
+  fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,frequency:entry.plan==='subscription'?'2x/month + 1 on-demand':'one-time',preferred_date:entry.date||'Flexible',notes:entry.notes||''})}).catch(function(){});
   fetch('/api/square',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:entry.name,phone:entry.phone,email:entry.email,address:entry.address,plan:planLabel,preferred_date:entry.date||'Flexible',notes:entry.notes||''})}).catch(function(){});
   document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
   document.querySelector('.progress-bar').style.display = 'none';
@@ -791,9 +759,8 @@ function submitBooking() {
 }
 
 function resetBooking() {
-  booking = {plan:'',freq:''};
+  booking = {plan:''};
   document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
-  document.querySelectorAll('.freq-card').forEach(function(c){ c.classList.remove('selected'); });
   document.querySelectorAll('.book-step').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('step1').classList.add('active');
   document.getElementById('btn1').disabled = true;
@@ -846,7 +813,7 @@ function openAdminPanel() {
   if(window._sb) {
     window._sb.from('Bookings').select('*').order('id',{ascending:false}).then(function(r){
       if(r.data && r.data.length > 0) {
-        bookingEntries = r.data.map(function(row){ return {name:row.name||'',phone:row.phone||'',email:row.email||'',address:row.address||'',plan:(row.plan||'').toLowerCase().includes('sub')?'subscription':'onetime',freq:row.frequency||'',date:row.preferred_date||'',notes:row.notes||'',submitted:row.created_at?new Date(row.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}; });
+        bookingEntries = r.data.map(function(row){ return {name:row.name||'',phone:row.phone||'',email:row.email||'',address:row.address||'',plan:(row.plan||'').toLowerCase().includes('sub')?'subscription':'onetime',date:row.preferred_date||'',notes:row.notes||'',submitted:row.created_at?new Date(row.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}; });
       }
       renderEntries(); updateStats();
     });
@@ -856,15 +823,15 @@ function openAdminPanel() {
 function logoutAdmin() { document.getElementById('adminPanel').classList.remove('show'); }
 
 function savePricing() {
-  pricing.onetime = parseFloat(document.getElementById('editOnetimePrice').value) || 25;
-  pricing.sub = parseFloat(document.getElementById('editSubPrice').value) || 37;
+  pricing.onetime = parseFloat(document.getElementById('editOnetimePrice').value) || 80;
+  pricing.sub = parseFloat(document.getElementById('editSubPrice').value) || 65;
   var oDesc = document.getElementById('editOnetimeDesc').value;
   var sDesc = document.getElementById('editSubDesc').value;
   document.getElementById('priceOnetime').innerHTML = '<sup>$</sup>' + pricing.onetime;
   document.getElementById('priceSub').innerHTML = '<sup>$</sup>' + pricing.sub;
   document.getElementById('descOnetime').textContent = oDesc;
   document.getElementById('descSub').textContent = sDesc;
-  document.getElementById('bookPriceOnetime').innerHTML = '$' + pricing.onetime + ' <span>/ bin</span>';
+  document.getElementById('bookPriceOnetime').innerHTML = '$' + pricing.onetime + ' <span>/ 2+ bins</span>';
   document.getElementById('bookPriceSub').innerHTML = '$' + pricing.sub + ' <span>/ mo</span>';
   var c = document.getElementById('saveConfirm');
   c.style.display = 'block';
